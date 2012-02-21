@@ -462,18 +462,17 @@ public class Model extends ModelParameters {
 	*/
 	
 	public void growFoods() {
-	  for ( Food food : foodList ) {
-	    int x = food.getX();
+	  for ( Food food : foodList ) {  // get the existing food objects, and go through them one at a time
+	    int x = food.getX();  // get their locations
 	    int y = food.getY();
-     	// find open neighbor cells and return a list of them
+     	// find these location's open neighbor cells and return a list of them
       ArrayList<Point> openPts = world.getOpenNeighborLocations( x, y );
-  		// place food objects at each location on the list
-      for ( Point p : openPts ) {
-        Food f = createNewFood();
-        int xA = (int)p.getX();
+      for ( Point p : openPts ) {  // get each open location on the list...
+        Food f = createNewFood();  // make a new food object f...
+        int xA = (int)p.getX();  // get the coordinates from the list...
         int yA = (int)p.getY();
-        world.putObjectAt( xA, yA, this );
-          f.setX( xA );         // tell the object where we put it
+        world.putObjectAt( xA, yA, this );  // put the new food in the empty spot
+          f.setX( xA );         // tell the food object where we put it
   			  f.setY( yA );
           foodList.add( f ); 	// add these new food object to foodList
       }
