@@ -1,8 +1,8 @@
 # begin reportfile
-# hostname: candido
+# hostname: rhizome
 # begin parameters
 rDebug=0
-seed=1329505326591
+seed=1329795682717
 stopT=100
 sizeX=100
 sizeY=100
@@ -15,7 +15,6 @@ initialAgentsFileName=
 initialParametersFileName=
 initialSteps=100
 numAnts=60
-numFoods=3
 outputDirName=./
 pherReportFrequency=9999999
 pherReportFileName=
@@ -35,8 +34,5 @@ tournamentSize=2
 #                                    Win10   
 #       Num   Num  avg    AveDist   AveDist    Avg      Avg
 # time  Ants  Die  AntX   toSource  toSource  RandMov  PrDieC
-    0    60     0  49.92  40.053   40.053     0.00     0.00
-    1    60     0  49.78  39.992   40.038     0.00     0.00
-    2    60     0  50.00  39.947   40.020     0.00     0.00
-# hostname: candido
-# end report file
+    0    60     0  45.07  40.622   40.622     0.00     0.00
+    1    60     0  46.62  40.615   40.620     0.00     0.00

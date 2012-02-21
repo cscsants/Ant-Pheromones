@@ -18,26 +18,27 @@ import uchicago.src.sim.engine.Schedule;
 import uchicago.src.sim.space.Diffuse2D;
 import uchicago.src.sim.util.SimUtilities;
 
+import uchicago.src.sim.space.*;
 
 public class Model extends ModelParameters {
 
 	// instance variables for run-time parameters
 	public int 				numAnts = 60;         // initial number of ants
-    public int              sizeX = 100, sizeY = 100;   // integer size of the world 
+  public int        sizeX = 100, sizeY = 100;   // integer size of the world 
 	public double			maxAntWeight = 10.0;   // max initial weight
 	public int				numFoods = 3;			// initial food piles
 	
 	public double			diffusionK = 0.90;	// for the pheromone space
 	public double			evapRate = 1.00; 	// this is really "inverse" of rate! 
-	public int			    maxPher = 32000;    // max value, so we can map to colors
-	public int 			    pSourceX, pSourceY; // exogenous source of pheromone
+	public int			  maxPher = 32000;    // max value, so we can map to colors
+	public int 			  pSourceX, pSourceY; // exogenous source of pheromone
 	public double			exogRate = 0.30;   	// exog source rate, frac  of maxPher
 	public int				initialSteps = 100; // pump in exog pher, diff, this # stpes
 	
 	// instance variables for model "structures"
 	public ArrayList<Ant>   antList = new ArrayList<Ant> ();
 	public ArrayList<Food>  foodList = new ArrayList<Food> ();
-	public TorusWorld	    world;         	// 2D class built over Repast
+	public TorusWorld	      world;         	// 2D class built over Repast
 	public Diffuse2D  	   	pSpace;			// a 2d space for pheromones from RePast
 	public Diffuse2D        pSpaceCarryingFood;    // a 2d space for pheromones dropped by ants
 
@@ -333,7 +334,8 @@ public class Model extends ModelParameters {
 		Food.setModel( this );
 		Food.setWorld( world );
 		
-		createFoodsAndAddToWorld();
+		createFoodsAndAddToWorld();  // place our food pile "seeds" randomly
+//		growFoods();  // add more food to the piles
 		
 		// tell the Ant class about this (Model) and world addresses
 		// so that the ant's can send messages to them, e.g.,
@@ -431,7 +433,6 @@ public class Model extends ModelParameters {
 				System.out.printf( "\n** World too full (%d) for new ant!\n\n",
 								   antList.size() );
 		}
-
 	}
 	
 	/**
@@ -451,7 +452,6 @@ public class Model extends ModelParameters {
 				System.out.printf( "\n** World too full (%d) for new food!\n\n",
 								   foodList.size() );
 		}
-
 	}
 
 	/**
@@ -461,13 +461,23 @@ public class Model extends ModelParameters {
 	// in each open cell, and iterate a set number of times (probably outside of this method)
 	*/
 	
-	public void growFoods ( ) {
-   		// find open neighbor cells and return a list of them
-	   
-		// place food objects at each location on the list
-
-		// add these new food object to foodList
-	 
+	public void growFoods() {
+	  for ( Food food : foodList ) {
+	    int x = food.getX();
+	    int y = food.getY();
+     	// find open neighbor cells and return a list of them
+      ArrayList<Point> openPts = world.getOpenNeighborLocations( x, y );
+  		// place food objects at each location on the list
+      for ( Point p : openPts ) {
+        Food f = createNewFood();
+        int xA = (int)p.getX();
+        int yA = (int)p.getY();
+        world.putObjectAt( xA, yA, this );
+          f.setX( xA );         // tell the object where we put it
+  			  f.setY( yA );
+          foodList.add( f ); 	// add these new food object to foodList
+      }
+    }
 	}
 
 	/**

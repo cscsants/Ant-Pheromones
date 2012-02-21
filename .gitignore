@@ -1,7 +1,6 @@
 # personalized shell scripts #
 ##############################
-guirun.sh
-compile.sh
+*.sh
 
 # Compiled source #
 ###################
@@ -37,3 +36,4 @@ compile.sh
 ehthumbs.db
 Icon?
 Thumbs.db
+*.java~
