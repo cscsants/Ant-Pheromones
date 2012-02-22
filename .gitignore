@@ -1,6 +1,8 @@
-# personalized shell scripts #
-##############################
+# personalized shell scripts and reports #
+##########################################
 *.sh
+*.sh~
+report.*
 
 # Compiled source #
 ###################
