@@ -23,64 +23,65 @@ import uchicago.src.sim.space.*;
 public class Model extends ModelParameters {
 
 	// instance variables for run-time parameters
-	public int 				numAnts = 60;         // initial number of ants
-  public int        sizeX = 100, sizeY = 100;   // integer size of the world 
-	public double			maxAntWeight = 10.0;   // max initial weight
-	public int				numFoods = 3;			// initial food piles
+	public int 			numAnts = 60;         // initial number of ants
+  	public int        		sizeX = 100, sizeY = 100;   // integer size of the world 
+	public double			maxAntWeight = 10.0;  // max initial weight
+	public int			numFoods = 3;	      // initial food piles
+	public int			foodDepth = 4;	      // how many times growFoods will iterate
 	
-	public double			diffusionK = 0.90;	// for the pheromone space
-	public double			evapRate = 1.00; 	// this is really "inverse" of rate! 
-	public int			  maxPher = 32000;    // max value, so we can map to colors
-	public int 			  pSourceX, pSourceY; // exogenous source of pheromone
-	public double			exogRate = 0.30;   	// exog source rate, frac  of maxPher
-	public int				initialSteps = 100; // pump in exog pher, diff, this # stpes
+	public double			diffusionK = 0.90;    // for the pheromone space
+	public double			evapRate = 1.00;      // this is really "inverse" of rate! 
+	public int			maxPher = 32000;      // max value, so we can map to colors
+	public int 			pSourceX, pSourceY;   // exogenous source of pheromone
+	public double			exogRate = 0.30;      // exog source rate, frac  of maxPher
+	public int			initialSteps = 100;   // pump in exog pher, diff, this # stpes
 	
 	// instance variables for model "structures"
-	public ArrayList<Ant>   antList = new ArrayList<Ant> ();
-	public ArrayList<Food>  foodList = new ArrayList<Food> ();
-	public TorusWorld	      world;         	// 2D class built over Repast
-	public Diffuse2D  	   	pSpace;			// a 2d space for pheromones from RePast
-	public Diffuse2D        pSpaceCarryingFood;    // a 2d space for pheromones dropped by ants
+	public ArrayList<Ant>   	antList =  new ArrayList<Ant> ();
+	public ArrayList<Food>  	foodList = new ArrayList<Food> ();
+	public TorusWorld	      	world;         	      // 2D class built over Repast
+	public Diffuse2D  	   	pSpace;		      // a 2d space for pheromones from RePast
+	public Diffuse2D        	pSpaceCarryingFood;   // a 2d space for pheromones dropped by ants
 
-	public double			probRandMoveMean;   // mean,var of probRandMove
-	public double			probRandMoveSD;    // assigned to bugs as created
+	public double			probRandMoveMean;     // mean,var of probRandMove
+	public double			probRandMoveSD;       // assigned to bugs as created
 	public double			probRandMoveMutSD;    // assigned to bugs as created
 
-	public double			probDieCenterMean;  // mean,var of prob of dying in 
-	public double			probDieCenterSD;   // center of world (by food!)
+	public double			probDieCenterMean;    // mean,var of prob of dying in 
+	public double			probDieCenterSD;      // center of world (by food!)
 	public double			probDieCenterMutSD;   // center of world (by food!)
 
-	public double			bestWinsProb = 0.90; // for tournament selection
-	public int				tournamentSize = 2;  // size of tournament
+	public double			bestWinsProb = 0.90;  // for tournament selection
+	public int			tournamentSize = 2;   // size of tournament
 	
-	public int				activationOrder;    // control how bug-activation is done
-	public static final     int fixedActivationOrder = 0;
-	public static final     int rwrActivationOrder = 1;  // random with replacement
-	public static final     int rworActivationOrder = 2; // random without replacement
+	public int			activationOrder;      // control how bug-activation is done
+	public static final int 	fixedActivationOrder = 0;
+	public static final int 	rwrActivationOrder = 1;   // random with replacement
+	public static final int 	rworActivationOrder = 2;   // random without replacement
 
-	public int				randomMoveMethod = 0;  // how bugs choose random cell to move to
+	public int			randomMoveMethod = 0;   // how bugs choose random cell to move to
 	
 	// instance variables for aggregate measures
-	public double			antPopAvgX;  	    // observed avg ant X loc
+	public double			antPopAvgX;  	      // observed avg ant X loc
 	public double			antPopAvgDistanceFromSource;
 	public double			totalPheromone;
 	public double			averageBugNbor1Count; // avg of #bugs d=1 away from each bug
 	public double			averageBugNbor2Count; // d=2 away
 	
-	public double			avgProbRandomMove;	   // the measured value!
-	public double			avgProbDieCenter;      // the measured value!
-	public int				deathsPerStep;
+	public double			avgProbRandomMove;    // the measured value!
+	public double			avgProbDieCenter;     // the measured value!
+	public int			deathsPerStep;
 
-	public DescriptiveStatistics avgDStats;  // univariate stats on averageDistanceFromSource
+	public DescriptiveStatistics 	avgDStats;  	      // univariate stats on averageDistanceFromSource
 
-	ArrayList<Point> keyPoints = new ArrayList<Point>();  // points to measure distance to
+	ArrayList<Point> 		keyPoints = new ArrayList<Point>();  // points to measure distance to
 
-    public String pherReportFileName = ""; 		// for a second report file
-    public PrintWriter pherReportFile, pherPlainTextReportFile;
-	public int pherReportFrequency = 9999999;  // basically its off 
+    	public String 			pherReportFileName = "";   // for a second report file
+    	public PrintWriter 		pherReportFile, pherPlainTextReportFile;
+	public int 			pherReportFrequency = 9999999;   // basically its off 
 
 	// an iv used by repast for keeping track of model steps
-	public Schedule   		schedule;			// repast schedule of events
+	public Schedule   		schedule;	      // repast schedule of events
 
 	/////////////////////////////////////////////////////////////////////////////
 	// To add a new parameter that can be set at run time (via command line or gui)
@@ -99,26 +100,26 @@ public class Model extends ModelParameters {
 	// to see all parameters and defaults, including new ones you add.
 
 	public void addModelSpecificParameters () {
-		parametersMap.put( "X", "sizeX" );
-		parametersMap.put( "Y", "sizeY" );
-		parametersMap.put( "nA", "numAnts" );
-		parametersMap.put( "nF", "numFoods");
-		parametersMap.put( "eR", "evapRate" );
-		parametersMap.put( "dK", "diffusionK" );
-		parametersMap.put( "exogR", "exogRate" );
-		parametersMap.put( "prmm", "probRandMoveMean"  );
-		parametersMap.put( "prmsd", "probRandMoveSD" );
-		parametersMap.put( "prmmsd", "probRandMoveMutSD" );
-		parametersMap.put( "prdcm", "probDieCenterMean"  );
-		parametersMap.put( "prdcsd", "probDieCenterSD" );
-		parametersMap.put( "prdcmsd", "probDieCenterMutSD" );
-		parametersMap.put( "ao", "activationOrder" );
-		parametersMap.put( "rmm", "randomMoveMethod" );
-		parametersMap.put( "bwp", "bestWinsProb" );
-		parametersMap.put( "ts", "tournamentSize" );
-		parametersMap.put( "pRFN", "pherReportFileName" );
-		parametersMap.put( "pRF", "pherReportFrequency" );
-		parametersMap.put( "iS", "initialSteps" );
+		parametersMap.put( "X", 	"sizeX" );
+		parametersMap.put( "Y", 	"sizeY" );
+		parametersMap.put( "nA", 	"numAnts" );
+		parametersMap.put( "nF", 	"numFoods");
+		parametersMap.put( "eR", 	"evapRate" );
+		parametersMap.put( "dK", 	"diffusionK" );
+		parametersMap.put( "exogR", 	"exogRate" );
+		parametersMap.put( "prmm", 	"probRandMoveMean"  );
+		parametersMap.put( "prmsd", 	"probRandMoveSD" );
+		parametersMap.put( "prmmsd", 	"probRandMoveMutSD" );
+		parametersMap.put( "prdcm", 	"probDieCenterMean"  );
+		parametersMap.put( "prdcsd", 	"probDieCenterSD" );
+		parametersMap.put( "prdcmsd", 	"probDieCenterMutSD" );
+		parametersMap.put( "ao", 	"activationOrder" );
+		parametersMap.put( "rmm", 	"randomMoveMethod" );
+		parametersMap.put( "bwp", 	"bestWinsProb" );
+		parametersMap.put( "ts", 	"tournamentSize" );
+		parametersMap.put( "pRFN", 	"pherReportFileName" );
+		parametersMap.put( "pRF", 	"pherReportFrequency" );
+		parametersMap.put( "iS", 	"initialSteps" );
 	}
 
 	// Specify what appears in the repast parameter panel
@@ -335,7 +336,7 @@ public class Model extends ModelParameters {
 		Food.setWorld( world );
 		
 		createFoodsAndAddToWorld();  // place our food pile "seeds" randomly
-//		growFoods();  // add more food to the piles
+       		growFoods();  // add more food to the piles
 		
 		// tell the Ant class about this (Model) and world addresses
 		// so that the ant's can send messages to them, e.g.,
@@ -428,7 +429,7 @@ public class Model extends ModelParameters {
 		for ( int i = 0; i < numAnts; ++i ) {
 			Ant ant = createNewAnt();
 			if ( world.placeAtRandomLocation( ant ) )  // if added to world...
-				antList.add( ant );					  // add to list
+				antList.add( ant );		   // add to list
 			else
 				System.out.printf( "\n** World too full (%d) for new ant!\n\n",
 								   antList.size() );
@@ -460,25 +461,35 @@ public class Model extends ModelParameters {
 	// for each existing food object, find open neighbors, place food objects
 	// in each open cell, and iterate a set number of times (probably outside of this method)
 	*/
-	
-	public void growFoods() {
-	  for ( Food food : foodList ) {  // get the existing food objects, and go through them one at a time
-	    int x = food.getX();  // get their locations
-	    int y = food.getY();
-     	// find these location's open neighbor cells and return a list of them
-      ArrayList<Point> openPts = world.getOpenNeighborLocations( x, y );
-      for ( Point p : openPts ) {  // get each open location on the list...
-        Food f = createNewFood();  // make a new food object f...
-        int xA = (int)p.getX();  // get the coordinates from the list...
-        int yA = (int)p.getY();
-        world.putObjectAt( xA, yA, this );  // put the new food in the empty spot
-          f.setX( xA );         // tell the food object where we put it
-  			  f.setY( yA );
-          foodList.add( f ); 	// add these new food object to foodList
-      }
-    }
-	}
 
+	public void growFoods() {
+		System.out.printf( "growFoods start: foodList.size = %d.\n",
+			foodList.size() );
+	        
+		for ( int i = 0; i < foodDepth; ++i ) {
+	       		ArrayList<Food> newFoodList = new ArrayList<Food>(); // for new food
+	       		for ( Food food : foodList ) { // get the existing food objects, and go through them one at a time
+	       			int x = food.getX(); // get their locations
+	       			int y = food.getY();
+	       			// find these location's open neighbor cells and return a list of them
+	       			ArrayList<Point> openPts = world.getOpenNeighborLocations( x, y );
+	       			for ( Point p : openPts ) { // get each open location on the list...
+	       			 	Food f = createNewFood(); // make a new food object f...
+	       				int xA = (int)p.getX(); // get the coordinates from the list...
+	       				int yA = (int)p.getY();
+	       				world.putObjectAt( xA, yA, this ); // put the new food in the empty spot
+	       				f.setX( xA ); // tell the food object where we put it
+	       				f.setY( yA );
+	       				newFoodList.add( f ); // add these new food object to foodList
+	       			}
+	       			System.out.printf( "newFoodList.size = %d.\n", newFoodList.size() );
+	       		}
+	       		foodList.addAll( newFoodList );
+	       		System.out.printf( "end foodList.size = %d.\n", foodList.size() );
+		}
+	}     
+
+        
 	/**
 	 * Again, stolen from Rick.
 	 * Create one new Food, with initial values set by draws from
@@ -486,8 +497,8 @@ public class Model extends ModelParameters {
 	 * @return
 	 */
 	public Food createNewFood( ) {
-		Food food = new Food();
-		return food;
+	       Food food = new Food();
+	       return food;
 	}
 	
 	/**
