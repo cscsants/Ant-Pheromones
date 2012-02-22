@@ -2,13 +2,12 @@ package AntPheromones;
 
 
 import java.awt.Color;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import uchicago.src.sim.analysis.OpenSequenceGraph;
-import uchicago.src.sim.analysis.Plot;
 import uchicago.src.sim.analysis.Sequence;
+
 import uchicago.src.sim.engine.AbstractGUIController;
 import uchicago.src.sim.engine.Controller;
 import uchicago.src.sim.gui.ColorMap;
@@ -22,14 +21,10 @@ public class GUIModel extends Model {
     private Object2DDisplay  worldDisplay;	// 2D Object lattice -> display (Repast)
 	private Object2DDisplay  foodDisplay;  // 2D object lattics -> display (Repast) FOOD!
     private DisplaySurface	 dsurf;		    // display surface (RePast)
-	public Value2DDisplay   pSpaceDisplay; // 2D Value lattice  -> display (Repast)
+	public Value2DDisplay    pSpaceDisplay; // 2D Value lattice  -> display (Repast)
 
     public  OpenSequenceGraph		graph;
     public  OpenSequenceGraph		graphNbors;
-    
-    public  Plot  					avgDistGraph;
-    public  double 					avgDistGraphRange = 200;
-    public  double					avgDistGraphMaxX = 200;
 
 	// colormap and scaling variables
 	public static ColorMap		 pherColorMap;
@@ -65,10 +60,6 @@ public class GUIModel extends Model {
 		dsurf = null;
 		graphNbors = null;
 
-		if ( avgDistGraph != null )
-            avgDistGraph.dispose();
-        avgDistGraph = null;
-        
 		// tell the Ant class we are in GUI mode.
 		Ant.setupBugDrawing( this );
 		Food.setupFoodDrawing( this );
@@ -141,13 +132,9 @@ public class GUIModel extends Model {
 		
 		// create mapper object, from 2D GridWorld to the display surface
 		worldDisplay = new Object2DDisplay( world );
-		
-		// let's try this with food
 		foodDisplay = new Object2DDisplay( world );
-
 		// speed up display of ants -- just display them!
         worldDisplay.setObjectList( antList );
-
 		foodDisplay.setObjectList( foodList );
 
 		// create the link between the pSpace and the dsurf.
@@ -188,11 +175,6 @@ public class GUIModel extends Model {
 				return getAntAvgDistanceFromSource() * 10;
 			}
 		}
-		class SeqDeathsPerStep implements Sequence {
-			public double getSValue() {
-				return deathsPerStep * 10;
-			}
-		}
 
 		graph = new OpenSequenceGraph( "Population Stats", this );
 		graph.setXRange( 0, 200 );
@@ -203,7 +185,6 @@ public class GUIModel extends Model {
 		graph.addSequence("Ant Avg X", new SeqAntPopAvgX(), Color.BLUE );
 		graph.addSequence("Ant Avg Dist Source * 10", 
 						  new SeqAntPopAvgDistSource(), Color.GREEN );
-		graph.addSequence("Deaths/step*10", new SeqDeathsPerStep(), Color.ORANGE );
 		graph.display();
 
 		// a second graph!
@@ -218,16 +199,6 @@ public class GUIModel extends Model {
 				return averageBugNbor2Count;
 			}
 		}
-		class AverageProbDieCenter implements Sequence {
-			public double getSValue() {
-				return avgProbDieCenter * 100;
-			}
-		}
-		class AverageProbRandomMove implements Sequence {
-			public double getSValue() {
-				return avgProbRandomMove * 100;
-			}
-		}
 		graphNbors = new OpenSequenceGraph( "More Stats", this );
 		graphNbors.setXRange( 0, 200 );
 		graphNbors.setYRange( 0, 10 );
@@ -235,35 +206,11 @@ public class GUIModel extends Model {
 		graphNbors.setAxisTitles( "time", "Avg #Nbors" );
 		graphNbors.addSequence("Avg. Bug 1-Nbor Count", new AverageBugNbor1Count());
 		graphNbors.addSequence("Avg. Bug 2-Nbor Count", new AverageBugNbor2Count());
-		graphNbors.addSequence("Avg. probDieCenter *100", new AverageProbDieCenter());
-		graphNbors.addSequence("Avg. probRandomMove *100", new AverageProbRandomMove());
 
 		graphNbors.display();
 		
-		createAvgDistGraph();
-		
 		if ( rDebug > 0 )
 			System.out.printf( "<== GUIModel buildDisplay done.\n" );
-	}
-	
-	/**
-	 * create Plot graph to show how to use use a for-loop to
-	 * add a number of lines determined at run time.
-	 */
-	public void createAvgDistGraph () {
-        avgDistGraph = new Plot("Avg Ant Distance to Points", this);
-        avgDistGraph.setXRange( 0, avgDistGraphMaxX );
-        avgDistGraph.setXIncrement( 200 ); // doesnt seem to work!
-        avgDistGraph.setYRange( 0, sizeY );
-        avgDistGraph.setAxisTitles("Time", "Avg Ant Distance To Point");
-
-        for ( int p = 0; p < keyPoints.size(); ++p ) {
-        	Point pt = keyPoints.get(p);
-            String axisTitle = String.format( "keyPoint %d (%.0f,%.0f)", 
-              p, pt.getX(), pt.getY() );
-            avgDistGraph.addLegend( p, axisTitle );
-        }
-        avgDistGraph.display();
 	}
 
 
@@ -312,19 +259,6 @@ public class GUIModel extends Model {
 		dsurf.updateDisplay();
 		graph.step();
 		graphNbors.step();
-		
-		// plot avgDist for the keyPoints
-		if ( getTickCount() > avgDistGraphMaxX ) {  //advance the window if needed
-			double min = avgDistGraphMaxX;
-			avgDistGraphMaxX += avgDistGraphRange; 
-	        avgDistGraph.setXRange( min, avgDistGraphMaxX );
-		}
-		for ( int p = 0; p < keyPoints.size(); ++p ) {
-			Point pt = keyPoints.get(p);
-		   double d = calcAvgAntPopDistanceTo( (int) pt.getX(), (int) pt.getY() );
-		   avgDistGraph.plotPoint( getTickCount(), d ,  p );
-		}
-		avgDistGraph.updateGraph();
 
 	}
 

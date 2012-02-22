@@ -35,7 +35,6 @@ public class Ant implements ObjectInGrid, Drawable {
 	//  0 -> pick uniform random from list
 	//  1 -> biased way to do it!
 	public static int randomMoveMethod = 0;
-	public static double maxDistanceToCenter;
 
 	// we use this to have Ant shades indicated their probRandMove
 	public static ColorMap		 probRandMoveColorMap;
@@ -48,8 +47,7 @@ public class Ant implements ObjectInGrid, Drawable {
 	public double		weight;		// ant's weight
 	public int			age;		// ant's age in days
 	public boolean		live;		// is it live or dead
-	public  double		probRandMove; // probability it'll  move randomly
-	public  double		probDieCenter; // probability it'll die at center
+	public  double		probRandMove; // probability i'll  move randomly
 	public Color		myColor;    // color of this agent
 
 	// an Ant constructor
@@ -107,14 +105,6 @@ public class Ant implements ObjectInGrid, Drawable {
 			}
 		}
 	}
-	public double getProbDieCenter() {
-		return probDieCenter;
-	}
-
-	public void setProbDieCenter(double probDieCenter) {
-		this.probDieCenter = probDieCenter;
-	}
-
 	/**
 	// setBugColorFromPRM - set color from from probRandMove
 	// Note we map from [0,0.5] to full range of colors
@@ -159,20 +149,6 @@ public class Ant implements ObjectInGrid, Drawable {
 	public static void setPSpace( Diffuse2D space ) {
 		pSpace = space;
 	}
-	/**
-	 * @return the maxDistanceToCenter
-	 */
-	public static double getMaxDistanceToCenter() {
-		return maxDistanceToCenter;
-	}
-
-	/**
-	 * @param maxDistanceToCenter the maxDistanceToCenter to set
-	 */
-	public static void setMaxDistanceToCenter(double maxDistanceToCenter) {
-		Ant.maxDistanceToCenter = maxDistanceToCenter;
-	}
-
 	public static void setGUIModel( GUIModel m ) { guiModel = m; }
 	public static void setRandomMoveMethod  ( int r ) { 
 		randomMoveMethod = r;
@@ -188,7 +164,7 @@ public class Ant implements ObjectInGrid, Drawable {
 	// return the number of neighbors the bug has, at distance d
 	@SuppressWarnings("unchecked")
 	public int getNumberOfNeighbors( int d ) {
-		Vector<Object> nbors = (Vector<Object>)world.getMooreNeighbors( x, y, d, d, false );
+		Vector<Object> nbors = (Vector<Object>) world.getMooreNeighbors( x, y, d, d, false );
 		return nbors.size();
 	}
 
@@ -201,19 +177,13 @@ public class Ant implements ObjectInGrid, Drawable {
 	//   if its got more pheromone than where the ant is now, move there
 	// - otherwise call makeRandomMove() method.
 	*/
-	public boolean step () {
+	public void step () {
 		int neighborhoodRadius = 1; 			 // how far do i look.
 		boolean moved = false;  // not moved this step so far
 
 		if ( model.getRDebug() > 0 ) 
 			System.err.printf( "   --Ant-step() for id=%d at x,y=%d,%d.\n",
 						   id, x, y );
-
-		amIStillAlive();
-		
-		if ( !live )  // if it died
-			return live;    	 // return its live value (false!)
-		
 		// see if we move randomly...
 		if ( probRandMove > Model.getUniformDoubleFromTo( 0.0, 1.0 ) ) {
 			Point pt = findRandomOpenNeighborCell ( );
@@ -224,8 +194,18 @@ public class Ant implements ObjectInGrid, Drawable {
 			}
 		}
 
-		else {  
-			moved = tryMoveToMorePheromone( neighborhoodRadius );
+		else {  // try to move to cell with more pheromone
+			Point pt =  findMostPheromoneOpenNeighborCell ( neighborhoodRadius );
+			if ( pt != null ) {  // we got one!
+				int newX = (int) pt.getX();
+				int newY = (int) pt.getY();
+				if ( pSpace.getValueAt( x, y ) < pSpace.getValueAt( newX, newY ) ) {
+					moved = world.moveObjectTo( this, newX, newY );
+					if ( moved &&  model.getRDebug() > 1 )
+						System.out.printf("     -- moved to better cell at %d,%d.\n",
+										  x, y );
+				}
+			}
 		}
 
 		if ( !moved )
@@ -234,47 +214,8 @@ public class Ant implements ObjectInGrid, Drawable {
 		if ( model.getRDebug() > 1 ) 
 			System.err.printf("      Ant.step() done. moved = %b.\n", moved );
 
-		return live;  // should be true!
 	}
-	
-	/**
-	 * amIStillAlive
-	// calculate bugs chance of dying, based on probDieCenter
-	// and distance to source:
-	//          pdc * ( 1 - d/D )
-	// where D = maxDistanceToCenter, and d = this bugs distance to source!
-	// NOTE: maxDistanceToCenter is really distance from 0,0 to source!
-	 * 
-	 * if died, set live field false.
-	 * @return live value
-	 */
-	public boolean amIStillAlive ( )  {
-		double dtc = model.calcDistanceToSource( this );
-		double probDie = probDieCenter * ( 1.0 - ( dtc / maxDistanceToCenter ));
-		
-		if ( probDie > Model.getUniformDoubleFromTo( 0.0, 1.0 ) ) {
-			live = false;
-		}
-		return live;
-	}
-	
-	public boolean tryMoveToMorePheromone ( int radius ) {
-		boolean moved = false;
-		// try to move to cell with more pheromone
-		Point pt =  findMostPheromoneOpenNeighborCell ( radius );
-		if ( pt != null ) {  // we got one!
-			int newX = (int) pt.getX();
-			int newY = (int) pt.getY();
-			if ( pSpace.getValueAt( x, y ) < pSpace.getValueAt( newX, newY ) ) {
-				moved = world.moveObjectTo( this, newX, newY );
-				if ( moved &&  model.getRDebug() > 1 )
-					System.out.printf("     -- moved to better cell at %d,%d.\n",
-									  x, y );
-			}
-		}	
-		return moved;
-	}
-	
+
 	/**
 	// findRandomOpenNeighborCell
 	// pick random open Moore neighbor cell and return its 
@@ -409,8 +350,8 @@ public class Ant implements ObjectInGrid, Drawable {
 	//
 	*/
 	public void printSelf ( ) {
-		System.out.printf( " - Ant %2d (x,y=%d,%d; live=%b) age %2d, wt %5.2f, prm %.2f, prdc %.2f\n",
-						   id, x, y, live, age, weight, probRandMove, probDieCenter );
+		System.out.printf( " - Ant %2d (x,y=%d,%d; live=%b) age %2d, wt %5.2f, prm %.2f\n",
+						   id, x, y, live, age, weight, probRandMove );
 	}
 
 	/**
