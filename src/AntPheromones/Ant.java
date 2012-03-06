@@ -25,7 +25,7 @@ import uchicago.src.sim.space.Object2DGrid;
 
 public class Ant implements ObjectInGrid, Drawable {
 	// "class" variables -- one value for all instances 
-        public static int          	nextId = 0; // to give each an id
+    public static int          	nextId = 0; // to give each an id
 	public static TorusWorld    	world;  	// where the agents live
 	public static Model		model;      // the model "in charge"
 	public static Diffuse2D	        pSpace;	    // where the pheromone is stored
@@ -190,8 +190,9 @@ public class Ant implements ObjectInGrid, Drawable {
 		if ( model.getRDebug() > 0 ) 
 			System.err.printf( "   --Ant-step() for id=%d at x,y=%d,%d.\n",
 						   id, x, y );
-		// first lets look for food
 		
+		// first lets look for food - actually, lets not.  see below...
+		// findFood();
 		
 		// see if we move randomly...
 		if ( probRandMove > Model.getUniformDoubleFromTo( 0.0, 1.0 ) ) {
@@ -203,7 +204,8 @@ public class Ant implements ObjectInGrid, Drawable {
 			}
 		}
 
-		else {  // try to move to cell with more pheromone
+		if ( carryingFood ) {  // if carrying food, go to the nest
+			// try to move to cell with more pheromone
 			Point pt =  findMostPheromoneOpenNeighborCell ( neighborhoodRadius );
 			if ( pt != null ) {  // we got one!
 				int newX = (int) pt.getX();
@@ -225,22 +227,46 @@ public class Ant implements ObjectInGrid, Drawable {
 
 	}
         
+
+	// while it seems logical to have the ants themselves look for food, this presents
+	// problems when trying to remove food from the world.  going to move this to the 
+	// model class ...
         
-        /**
+	//        /**
 	// findFood
 	// 
 	//  look around and see if there is a food object
 	//  if so, remove it from the world, set carryingFood to true
 	//  if food found, return null
-	*/
-        public void findFood() {
-                // look at the neighborhood
-                Vector possibleFoods = world.getMooreNeighbors( x, y );
-                if ( possibleFoods.contains( food ) ) {
-                        id = food.getId();
-                        foodList.remove( id );
-                }
-        }
+	// **/
+
+	//        public void findFood() {
+	//      // look at the neighborhood & id food objects	\
+	//	int x = 0;
+	//	int y = 0;
+	//	int fId = 0;
+	//   	Point foodP = null;
+	//	ArrayList<Point> foodPts = world.getFoodLocations( x, y );
+	//
+	//	// now pick a random open point, if any to pick from
+	//	if ( foodPts.size() > 0 ) {
+	//	if ( randomMoveMethod == 0 ) {
+	//		foodP = foodPts.get( Model.getUniformIntFromTo( 0, foodPts.size()-1 ) );
+	//	}
+	//	else   // randomMoveMethod = 1 is a biased way to do it!
+	//		foodP = foodPts.get( 0 );
+	//}
+	//	int xA = (int)foodP.getX(); 
+	//     	int yA = (int)foodP.getY();
+	//     	world.getObjectAt( xA, yA );
+	//	removeFoodFromModel( this, true );
+	//
+	//}
+
+			// tell the model to remove the food object
+
+			// set carryingFood to true
+
 
 
 	/**
