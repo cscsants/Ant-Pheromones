@@ -2,7 +2,7 @@
 <reportfile>
 <parameters>
 	<rDebug>0</rDebug>
-	<seed>1329937553081</seed>
+	<seed>1330708021921</seed>
 	<stopT>100</stopT>
 	<sizeX>100</sizeX>
 	<sizeY>100</sizeY>
@@ -13,7 +13,7 @@
 	<foodDepth>4</foodDepth>
 	<initialAgentsFileName></initialAgentsFileName>
 	<initialParametersFileName></initialParametersFileName>
-	<numFoods>10</numFoods>
+	<numFoods>3</numFoods>
 	<numAnts>20</numAnts>
 	<outputDirName>./</outputDirName>
 	<probRandMoveMean>0.0</probRandMoveMean>

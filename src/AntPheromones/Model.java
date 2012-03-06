@@ -19,31 +19,31 @@ import uchicago.src.sim.util.SimUtilities;
 public class Model extends ModelParameters {
 
 	// instance variables for run-time parameters
-	public int 				numAnts = 20;         // initial number of ants
-    public int              sizeX = 100, sizeY = 100;   // integer size of the world 
-	public double			maxAntWeight = 10.0;   // max initial weight
-	public int			    numFoods = 3;	      // initial food piles
-	public int			    foodDepth = 4;	      // how many times growFoods will iterate
+	public int 	        numAnts = 20;         // initial number of ants
+    	public int              sizeX = 100, sizeY = 100;   // integer size of the world 
+	public double		maxAntWeight = 10.0;   // max initial weight
+	public int		numFoods = 3;	      // initial food piles
+	public int		foodDepth = 4;	      // how many times growFoods will iterate
 
-	public double			diffusionK = 0.90;	// for the pheromone space
-	public double			evapRate = 1.00; 	// this is really "inverse" of rate! 
-	public int			    maxPher = 32000;    // max value, so we can map to colors
-	public int 			    pSourceX, pSourceY; // exogenous source of pheromone
-	public double			exogRate = 0.30;   	// exog source rate, frac  of maxPher
-	public int			    initialSteps = 100;   // pump in exog pher, diff, this # steps
+	public double	        diffusionK = 0.90;	// for the pheromone space
+	public double		evapRate = 1.00; 	// this is really "inverse" of rate! 
+	public int		maxPher = 32000;    // max value, so we can map to colors
+	public int 		pSourceX, pSourceY; // exogenous source of pheromone
+	public double		exogRate = 0.30;   	// exog source rate, frac  of maxPher
+	public int		initialSteps = 100;   // pump in exog pher, diff, this # steps
 
 	// instance variables for model "structures"
 	public ArrayList<Ant>   antList = new ArrayList<Ant> ();
-	public ArrayList<Food> foodList = new ArrayList<Food> ();
+	public ArrayList<Food>  foodList = new ArrayList<Food> ();
 
-	public TorusWorld	    world;         	// 2D class built over Repast
-	public Diffuse2D  	   	pSpace;			// a 2d space for pheromones from RePast
-	public Diffuse2D       pSpaceCarryingFood;   // a 2d space for pheromones dropped by ants
+	public TorusWorld	world;         	// 2D class built over Repast
+	public Diffuse2D  	pSpace;			// a 2d space for pheromones from RePast
+	public Diffuse2D        pSpaceCarryingFood;   // a 2d space for pheromones dropped by ants
 
-	public double			probRandMoveMean;   // mean,var of probRandMove
-	public double			probRandMoveSD;    // assigned to bugs as created
+	public double		probRandMoveMean;   // mean,var of probRandMove
+	public double		probRandMoveSD;    // assigned to bugs as created
 
-	public int				activationOrder;    // control how bug-activation is done
+	public int		activationOrder;    // control how bug-activation is done
 	public static final     int fixedActivationOrder = 0;
 	public static final     int rwrActivationOrder = 1;  // random with replacement
 	public static final     int rworActivationOrder = 2; // random without replacement
@@ -51,11 +51,11 @@ public class Model extends ModelParameters {
 	public int				randomMoveMethod = 0;  // how bugs choose random cell to move to
 	
 	// instance variables for aggregate measures
-	public double			antPopAvgX;  	    // observed avg ant X loc
-	public double			antPopAvgDistanceFromSource;
-	public double			totalPheromone;
-	public double			averageBugNbor1Count; // avg of #bugs d=1 away from each bug
-	public double			averageBugNbor2Count; // d=2 away
+	public double	       antPopAvgX;  	    // observed avg ant X loc
+	public double	       antPopAvgDistanceFromSource;
+	public double	       totalPheromone;
+	public double	       averageBugNbor1Count; // avg of #bugs d=1 away from each bug
+	public double	       averageBugNbor2Count; // d=2 away
 
 
 	// an iv used by repast for keeping track of model steps
@@ -243,7 +243,7 @@ public class Model extends ModelParameters {
 		Food.setWorld( world );
 		
 		createFoodsAndAddToWorld();  // place our food pile "seeds" randomly
-       	growFoods();  // add more food to the piles
+       	        growFoods();  // add more food to the piles
 
 		// tell the Ant class about this (Model) and world addresses
 		// so that the ant's can send messages to them, e.g.,
@@ -342,7 +342,13 @@ public class Model extends ModelParameters {
 					System.out.printf( "end foodList.size = %d.\n", foodList.size() );
 		}
 	}     
-
+        
+        public void removeFoodFromModel ( Food food, Boolean removeFromList ) {
+		if ( removeFromList )
+			foodList.remove( food );
+		        world.putObjectAt( food.getX(), food.getY(), null );
+	}
+        
 	/**
 	 * Again, stolen from Rick.
 	 * Create one new Food, with initial values set by draws from

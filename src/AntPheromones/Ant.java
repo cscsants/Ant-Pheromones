@@ -20,35 +20,37 @@ import uchicago.src.sim.gui.Drawable;
 import uchicago.src.sim.gui.SimGraphics;
 import uchicago.src.sim.space.Diffuse2D;
 import uchicago.src.sim.gui.ColorMap;
+import uchicago.src.sim.space.Object2DGrid;
 
 
 public class Ant implements ObjectInGrid, Drawable {
 	// "class" variables -- one value for all instances 
-    public  static int          	nextId = 0; // to give each an id
-	public  static TorusWorld    	world;  	// where the agents live
-	public  static Model		   	model;      // the model "in charge"
-	public  static Diffuse2D		pSpace;	    // where the pheromone is stored
-	public  static GUIModel		    guiModel = null;   // the gui model "in charge"
-    // we'll use this to draw a border around the bugs' cells (the f means float)
-    public  static BasicStroke      bugEdgeStroke = new BasicStroke( 1.0f );
+        public static int          	nextId = 0; // to give each an id
+	public static TorusWorld    	world;  	// where the agents live
+	public static Model		model;      // the model "in charge"
+	public static Diffuse2D	        pSpace;	    // where the pheromone is stored
+	public static GUIModel		guiModel = null;   // the gui model "in charge"
+        // we'll use this to draw a border around the bugs' cells (the f means float)
+        public  static BasicStroke      bugEdgeStroke = new BasicStroke( 1.0f );
 	// randomMoveMethod -- how to pick that random cell to move to
 	//  0 -> pick uniform random from list
 	//  1 -> biased way to do it!
 	public static int randomMoveMethod = 0;
 
 	// we use this to have Ant shades indicated their probRandMove
-	public static ColorMap		 probRandMoveColorMap;
+	public static ColorMap	     probRandMoveColorMap;
 	public static final int      colorMapSize = 64;
 	public static final double   colorMapMax =  colorMapSize - 1.0;
 	
 	// instance variables  
-	public int 	   		id;			// unique id number for each ant instance
-	public int 			x, y;		// cache the ant's x,y location
+	public int 	   	id;		// unique id number for each ant instance
+	public int 		x, y;		// cache the ant's x,y location
 	public double		weight;		// ant's weight
-	public int			age;		// ant's age in days
+	public int		age;		// ant's age in days
 	public boolean		live;		// is it live or dead
-	public  double		probRandMove; // probability i'll  move randomly
-	public Color		myColor;    // color of this agent
+	public double		probRandMove;   // probability i'll  move randomly
+	public Color		myColor;        // color of this agent
+	public boolean          carryingFood;   // is the ant carrying food?
 
 	// an Ant constructor
 	// note it assigns ID values in sequence as ant's are created.
@@ -59,6 +61,7 @@ public class Ant implements ObjectInGrid, Drawable {
 		live = true;
 		probRandMove = 0.0;
 		setInitialColor();
+		carryingFood = false;
 	}
 
 	public Ant ( double wt ) {  // required weight parameters
@@ -69,6 +72,7 @@ public class Ant implements ObjectInGrid, Drawable {
 		live = true; 
 		probRandMove = 0.0;
 		setInitialColor();
+		carryingFood = false; 
 	}
 
 	public void setInitialColor () {  // set agents initial color
@@ -91,6 +95,8 @@ public class Ant implements ObjectInGrid, Drawable {
 	public void setAge( int a ) { age = a; }
 	public boolean getLive() { return live; }
 	public void setLive( boolean l ) { live = l; }
+	public boolean getCarryingFood() { return carryingFood; }
+	public void setCarryingFood( boolean c ) { carryingFood = c; }
 
 
 	public double getProbRandMove() { return probRandMove; }
@@ -184,10 +190,13 @@ public class Ant implements ObjectInGrid, Drawable {
 		if ( model.getRDebug() > 0 ) 
 			System.err.printf( "   --Ant-step() for id=%d at x,y=%d,%d.\n",
 						   id, x, y );
+		// first lets look for food
+		
+		
 		// see if we move randomly...
 		if ( probRandMove > Model.getUniformDoubleFromTo( 0.0, 1.0 ) ) {
 			Point pt = findRandomOpenNeighborCell ( );
-            if ( pt != null ) { 
+                if ( pt != null ) { 
                 moved = world.moveObjectTo( this, (int) pt.getX(), (int) pt.getY() );
 				if ( moved && model.getRDebug() > 1 ) 
 					System.out.printf("     -- moved to random cell %d,%d.\n",x,y);
@@ -215,6 +224,24 @@ public class Ant implements ObjectInGrid, Drawable {
 			System.err.printf("      Ant.step() done. moved = %b.\n", moved );
 
 	}
+        
+        
+        /**
+	// findFood
+	// 
+	//  look around and see if there is a food object
+	//  if so, remove it from the world, set carryingFood to true
+	//  if food found, return null
+	*/
+        public void findFood() {
+                // look at the neighborhood
+                Vector possibleFoods = world.getMooreNeighbors( x, y );
+                if ( possibleFoods.contains( food ) ) {
+                        id = food.getId();
+                        foodList.remove( id );
+                }
+        }
+
 
 	/**
 	// findRandomOpenNeighborCell
