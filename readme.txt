@@ -19,7 +19,8 @@ Outline of readme.txt
 ---------------------------------------------------------------------------
 Getting and Running the Model
 	Type "git clone git@github.com:cscsants/Ant-Pheromones.git" into a
-	terminal to get a local copy.  To run the model, use "./guirun".
+	terminal to get a local copy.  To run the model, edit the shell scripts
+	to point to the proper directories and libraries, and run the guimodel script.
 ---------------------------------------------------------------------------	
 ---------------------------------------------------------------------------
 Background Information
