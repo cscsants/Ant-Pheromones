@@ -19,7 +19,8 @@ Outline of readme.txt
 ---------------------------------------------------------------------------
 Getting and Running the Model
 	Type "git clone git@github.com:cscsants/Ant-Pheromones.git" into a
-	terminal to get a local copy.  To run the model, use "./guirun".
+	terminal to get a local copy.  To run the model, edit the shell scripts
+	to point to the proper directories and libraries, and run the guimodel script.
 ---------------------------------------------------------------------------	
 ---------------------------------------------------------------------------
 Background Information
@@ -136,7 +137,10 @@ Process and Considerations
 	*  Next reconfigured the pSpace of AntPheromones2 to create our pSpace that acts as
 		a latent and static draw to the nest that we could trigger once the ants possessed food
 	*  Ants and Food couldn't interact, instead ants just would get stuck bumping up against the edges of the cubes
-	*
+	*  The Ants now react to bumping into food, as evidenced my a model slowdown, but no food objects are 
+		passed along the various arraylists or removed from the model.
+	*  Adding in a secondary pheromone space results in the ants being paralyzed by an evenly distributed source of the 
+		food carrying pheromone, even if none has been injected into the model.
 
 				
 
