@@ -22,6 +22,7 @@ public class GUIModel extends Model {
     // private Object2DDisplay  foodDisplay;  // 2D object lattics -> display (Repast) FOOD!
     private DisplaySurface	 dsurf;		    // display surface (RePast)
     public Value2DDisplay    pSpaceDisplay; // 2D Value lattice  -> display (Repast)
+    public Value2DDisplay    pSpaceCarryingFoodDisplay; // 2D Value lattice  -> display (Repast)
 
     public  OpenSequenceGraph		graph;
     public  OpenSequenceGraph		graphNbors;
@@ -29,6 +30,7 @@ public class GUIModel extends Model {
 
 	// colormap and scaling variables
 	public static ColorMap		 pherColorMap;
+	public static ColorMap		 pherCFColorMap;
 	public static final int      colorMapSize = 64;
 	public static final double   colorMapMax =  colorMapSize - 1.0;
 
@@ -126,6 +128,14 @@ public class GUIModel extends Model {
             // we specify the position i, and a fraction of each of RGB shade
 			pherColorMap.mapColor ( i, i /  colorMapMax, 0, 0 );
 		}
+		
+		// create the ColorMap for displayihg the amount of ant pheromone
+		// as a degree of blue-ness in the cells.
+		pherCFColorMap = new ColorMap ();
+		for (int i = 0; i < colorMapSize; i++) {
+            // we specify the position i, and a fraction of each of RGB shade
+			pherColorMap.mapColor ( 0, 0, i, i /  colorMapMax );
+		}
 
 		// we are going to display bug color based on probRandMove
 		setBugColorBasedOnProbRandMove();
@@ -154,7 +164,8 @@ public class GUIModel extends Model {
 		pSpaceDisplay.setDisplayMapping( m, 0 );
 
 		// add the pSpace to the surface first, so the bugs write over it.
-        dsurf.addDisplayable( pSpaceDisplay, "Pheromone");
+        dsurf.addDisplayable( pSpaceDisplay, "Nest Pheromone");
+        dsurf.addDisplayable( pSpaceCarryingFoodDisplay, "Ant Pheromone");
 		// now add the display of agents
         dsurf.addDisplayableProbeable( worldDisplay, "Agents");
 		// dsurf.addDisplayableProbeable( foodDisplay, "Food");

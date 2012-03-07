@@ -444,7 +444,14 @@ public class Model extends ModelParameters {
                          	                removeFoodFromModel( foodP, true );
                                                 ant.setCarryingFood( true );
                          	        }
-                        }                              
+                        }
+                        // now, if they're carrying food, drop pheromone
+                        double v = (maxPher * exogRate) + pSpaceCarryingFood.getValueAt(  ant.getX(), ant.getY() );
+        		v =  Math.min( v, maxPher );
+        		pSpaceCarryingFood.putValueAt( ant.getX(), ant.getY(), v );
+
+        		// now update the pSpace -- move values from the write to read copy
+        		pSpaceCarryingFood.update();                              
                 }
 		
 		
