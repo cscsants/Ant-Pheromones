@@ -1,6 +1,6 @@
 # personalized shell scripts and reports #
 ##########################################
-*.sh
+
 *.sh~
 report.*
 
