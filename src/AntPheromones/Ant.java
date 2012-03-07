@@ -52,6 +52,7 @@ public class Ant implements ObjectInGrid, Drawable {
 	public double		probRandMove;   // probability i'll  move randomly
 	public Color		myColor;        // color of this agent
 	public boolean          carryingFood;   // is the ant carrying food?
+	public boolean          atNest;         // is the ant at the nest?
 
 	// an Ant constructor
 	// note it assigns ID values in sequence as ant's are created.
@@ -63,6 +64,7 @@ public class Ant implements ObjectInGrid, Drawable {
 		probRandMove = 0.0;
 		setInitialColor();
 		carryingFood = false;
+		atNest = false;
 	}
 
 	public Ant ( double wt ) {  // required weight parameters
@@ -177,6 +179,10 @@ public class Ant implements ObjectInGrid, Drawable {
 		Vector<Object> nbors = (Vector<Object>) world.getMooreNeighbors( x, y, d, d, false );
 		return nbors.size();
 	}
+        
+        public boolean amIAtNest( ant )
+                if ( getX() = world.sizeX/2 && getY() = world.sizeY/2 )
+                setAtNest = True; 
 
 	/**
 	// step
@@ -207,6 +213,8 @@ public class Ant implements ObjectInGrid, Drawable {
 					System.out.printf("     -- moved to random cell %d,%d.\n",x,y);
 			}
 		}
+                
+                if ( 
 
 		if ( carryingFood ) {  // if carrying food, go to the nest
 			// try to move to cell with more pheromone
@@ -215,6 +223,21 @@ public class Ant implements ObjectInGrid, Drawable {
 				int newX = (int) pt.getX();
 				int newY = (int) pt.getY();
 				if ( pSpace.getValueAt( x, y ) < pSpace.getValueAt( newX, newY ) ) {
+					moved = world.moveObjectTo( this, newX, newY );
+					if ( moved &&  model.getRDebug() > 1 )
+						System.out.printf("     -- moved to better cell at %d,%d.\n",
+										  x, y );
+				}
+			}
+		}
+                
+                else {  // look for ants carrying food &
+			// try to move to cell with more pheromone
+			Point pt =  findMostCarryingFoodPheromoneOpenNeighborCell ( neighborhoodRadius );
+			if ( pt != null ) {  // we got one!
+				int newX = (int) pt.getX();
+				int newY = (int) pt.getY();
+				if ( pSpaceCarryingFood.getValueAt( x, y ) < pSpaceCarryingFood.getValueAt( newX, newY ) ) {
 					moved = world.moveObjectTo( this, newX, newY );
 					if ( moved &&  model.getRDebug() > 1 )
 						System.out.printf("     -- moved to better cell at %d,%d.\n",
@@ -299,6 +322,60 @@ public class Ant implements ObjectInGrid, Drawable {
 		return openP;
 	}
 	
+	/**
+	// findMostCarryingFoodPheromoneOpenNeighborCell
+	// look at open neighbor cells (within d), return Point with coordinates
+	// of cell with most pheromone.
+	// Return null if no open cell found.
+	// NB: This assumes world is a TorusWorld, so we normalize x,y values.
+	// NB: pick from ties at random
+	*/
+	
+	public Point findMostCarryingFoodPheromoneOpenNeighborCell ( int d ) {
+		ArrayList<Point> openPts = new ArrayList<Point>();  // list of open points
+		int minx = x - d;
+		int maxx = x + d;
+		int miny = y - d;
+		int maxy = y + d;
+
+		// look at neighbor cells, get a list of those with the most Pher.
+		// (the list could be just 1 cell of course.)
+		double mostP = -1;  // most P seen so far;  anything is better than -1!
+		for ( int tx = minx; tx <= maxx; ++tx ) {
+			int txnorm = world.xnorm( tx );
+			for ( int ty = miny; ty <= maxy; ++ty ) {
+				int tynorm = world.ynorm( ty );
+				if ( world.getObjectAt( txnorm, tynorm ) == null ) { // its open 
+					double p = pSpaceCarryingFood.getValueAt( txnorm, tynorm );
+					if ( p >= mostP ) { 		// best or better than best so far
+						if ( p > mostP ) { 		// new best!
+							openPts.clear();  	// get rid of any previous best
+							mostP = p;          // set to new best value
+						}
+						openPts.add( new Point( tx, ty ) );   // add to list
+					}
+				}
+			}
+		}
+
+		// now pick a random open best point, if any to pick from
+		int    numOpenPts = openPts.size();
+		Point  openP = null;  				// the one we return
+		if ( numOpenPts == 1 )				// only one to pick!
+			openP = openPts.get( 0 );
+		else if ( numOpenPts > 1 )      	// pick one at random
+			openP = openPts.get( Model.getUniformIntFromTo( 0, numOpenPts-1 ) );
+
+		if ( model.getRDebug() > 2 ) {
+			if ( openP == null ) 
+				System.out.printf( "     -> no open neighbor with more food pheromone.\n" );
+			else
+				System.out.printf( "     -> new best@%.0f,%.0f (ph=%.3f vs here=%.3f)\n",
+		   			   openP.getX(), openP.getY(), mostP, pSpace.getValueAt( x, y ) );
+		}
+
+		return openP;
+	}
 
 	/**
 	// findMostPheromoneOpenNeighborCell

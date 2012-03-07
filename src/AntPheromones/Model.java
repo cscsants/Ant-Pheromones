@@ -31,7 +31,7 @@ public class Model extends ModelParameters {
 	public int		maxPher = 32000;    // max value, so we can map to colors
 	public int 		pSourceX, pSourceY; // exogenous source of pheromone
 	public double		exogRate = 0.30;   	// exog source rate, frac  of maxPher
-	public int		initialSteps = 100;   // pump in exog pher, diff, this # steps
+	public int		initialSteps = 1000;   // pump in exog pher, diff, this # steps
 
 	// instance variables for model "structures"
 	public ArrayList<Ant>   antList = new ArrayList<Ant> ();
@@ -225,23 +225,16 @@ public class Model extends ModelParameters {
 
 		// create the 2D grid world of requested size, linked to this model
 		world = new TorusWorld( sizeX, sizeY, this );
+                
+                // inject initial nest pheromone
+                createPSpaceAndInjectInitialPheromone();
+                createPSpaceCarryingFoodAndInjectInitialPheromone();
+                
+                for ( int i = 0; i < initialSteps; ++i ) {
+                        injectExogenousPheromoneAndUpdate();
+                	pSpace.diffuse();
+                }
 
-		// Set up the pheromone spaces and related fields.
-		// create the 2D diffusion space for pheromones, tell bugs about it
-		pSpace = new Diffuse2D( diffusionK, evapRate, sizeX, sizeY );
-		pSpaceCarryingFood = new Diffuse2D( diffusionK, evapRate, sizeX, sizeY );
-		// set up the location of exogenous source of pheromone
-		pSourceX = sizeX/2;
-		pSourceY = sizeY/2;
-		// lets start the world with some pheromone...
-		// more than gets added each step...but not more than maxPher!
-		double exogPheromone = 2.0 * maxPher * exogRate;
-		double initPher = Math.min( exogPheromone, (double) maxPher );
-		pSpace.putValueAt( pSourceX, pSourceY, initPher );
-		pSpace.update();   // move from write copy to read copy
-		if ( rDebug > 0 )
-			System.out.printf( "- userBuildModel: put initPher=%.3f at %d,%d.\n",
-				  pSpace.getValueAt(pSourceX,pSourceY), pSourceX, pSourceY );
 		
 		// tell the Food class about this (Model)and world addresses
 		// so that the foods can send messages to them, e.g.,
@@ -270,6 +263,38 @@ public class Model extends ModelParameters {
 			System.out.printf( "<==  userbuildModel done.\n" );
 
 	}
+        
+        
+        private void injectExogenousPheromoneAndUpdate() {
+        	double v = (maxPher * exogRate) + pSpace.getValueAt(  pSourceX, pSourceY );
+        	v =  Math.min( v, maxPher );
+        	pSpace.putValueAt( pSourceX, pSourceY, v );
+        	pSpace.update();		
+        }
+        
+        private void createPSpaceCarryingFoodAndInjectInitialPheromone() {
+               // pSpaceCarryingFood = new Diffuse2D( diffusionK, evapRate, sizeX, sizeY );
+               pSpaceCarryingFood = new Diffuse2D( diffusionK, evapRate, sizeX, sizeY );  
+        }
+
+        private void createPSpaceAndInjectInitialPheromone() {
+        	// Set up the pheromone space and related fields.
+        	// create the 2D diffusion space for pheromones, tell bugs about it
+        	pSpace = new Diffuse2D( diffusionK, evapRate, sizeX, sizeY );
+        	// set up the location of exogenous source of pheromone
+        	pSourceX = sizeX/2;
+        	pSourceY = sizeY/2;
+        	// lets start the world with some pheromone...
+        	// more than gets added each step...but not more than maxPher!
+        	double exogPheromone = 2.0 * maxPher * exogRate;
+        	double initPher = Math.min( exogPheromone, (double) maxPher );
+        	pSpace.putValueAt( pSourceX, pSourceY, initPher );
+        	pSpace.update();   // move from write copy to read copy
+        	if ( rDebug > 0 )
+        		System.out.printf( "- userBuildModel: put initPher=%.3f at %d,%d.\n",
+        			  pSpace.getValueAt(pSourceX,pSourceY), pSourceX, pSourceY );		
+        }
+
 
 	/**
 	// createAntsAndAddToWorld
@@ -404,6 +429,7 @@ public class Model extends ModelParameters {
 		// diffuse() diffuses from the read matrix (T) and into write (T')
 		// *and* it then does an update(), i.e., writes T' into new read T+1
 		pSpace.diffuse();
+		pSpaceCarryingFood.diffuse();
 
 		// activate bugs in user specified order
 		if ( activationOrder == fixedActivationOrder ) {

@@ -19,8 +19,7 @@ import uchicago.src.sim.gui.Value2DDisplay;
 public class GUIModel extends Model {
 
     private Object2DDisplay  worldDisplay;	// 2D Object lattice -> display (Repast)
-    // private Object2DDisplay  foodDisplay;  // 2D object lattics -> display (Repast) FOOD!
-    private DisplaySurface	 dsurf;		    // display surface (RePast)
+    private DisplaySurface   dsurf;		    // display surface (RePast)
     public Value2DDisplay    pSpaceDisplay; // 2D Value lattice  -> display (Repast)
     public Value2DDisplay    pSpaceCarryingFoodDisplay; // 2D Value lattice  -> display (Repast)
 
@@ -126,7 +125,7 @@ public class GUIModel extends Model {
 		pherColorMap = new ColorMap ();
 		for (int i = 0; i < colorMapSize; i++) {
             // we specify the position i, and a fraction of each of RGB shade
-			pherColorMap.mapColor ( i, i /  colorMapMax, 0, 0 );
+			pherColorMap.mapColor ( i, 0, 0, i /  colorMapMax );
 		}
 		
 		// create the ColorMap for displayihg the amount of ant pheromone
@@ -147,7 +146,7 @@ public class GUIModel extends Model {
 		worldDisplay = new Object2DDisplay( world );
 		// foodDisplay = new Object2DDisplay( world );
 		// speed up display of ants -- just display them!
-        worldDisplay.setObjectList( allList );
+                worldDisplay.setObjectList( allList );
 		// foodDisplay.setObjectList( foodList );
 
 		// create the link between the pSpace and the dsurf.
@@ -162,6 +161,12 @@ public class GUIModel extends Model {
 		if ( rDebug > 1 )
 			System.out.printf( "  -> pSpaceDisplay scaling m = %d.\n", m );
 		pSpaceDisplay.setDisplayMapping( m, 0 );
+		// and now for the food pheromone...
+		pSpaceCarryingFoodDisplay = new Value2DDisplay( pSpaceCarryingFood, pherCFColorMap );
+		int n = (int) (maxPher / colorMapMax);
+		if ( rDebug > 1 )
+			System.out.printf( "  -> pSpaceCarryingFoodDisplay scaling m = %d.\n", n );
+		pSpaceDisplay.setDisplayMapping( n, 0 );
 
 		// add the pSpace to the surface first, so the bugs write over it.
         dsurf.addDisplayable( pSpaceDisplay, "Nest Pheromone");

@@ -2,7 +2,7 @@
 <reportfile>
 <parameters>
 	<rDebug>0</rDebug>
-	<seed>1331128698382</seed>
+	<seed>1331132616274</seed>
 	<stopT>100</stopT>
 	<sizeX>100</sizeX>
 	<sizeY>100</sizeY>
@@ -24,4 +24,3 @@
 	<randomMoveMethod>0</randomMoveMethod>
 	<saveRunEndState>0</saveRunEndState>
 </parameters>
-</reportfile>
