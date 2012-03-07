@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Random;
 
 import uchicago.src.sim.engine.Schedule;
 import uchicago.src.sim.space.Diffuse2D;
@@ -35,6 +36,7 @@ public class Model extends ModelParameters {
 	// instance variables for model "structures"
 	public ArrayList<Ant>   antList = new ArrayList<Ant> ();
 	public ArrayList<Food>  foodList = new ArrayList<Food> ();
+	public ArrayList<ObjectInGrid>	allList= new ArrayList<ObjectInGrid>();
 
 	public TorusWorld	world;         	// 2D class built over Repast
 	public Diffuse2D  	pSpace;			// a 2d space for pheromones from RePast
@@ -42,7 +44,8 @@ public class Model extends ModelParameters {
 
 	public double		probRandMoveMean;   // mean,var of probRandMove
 	public double		probRandMoveSD;    // assigned to bugs as created
-
+        public Random           randomNumber = new Random(); // Math.random() didnt seem to work with integers
+        
 	public int		activationOrder;    // control how bug-activation is done
 	public static final     int fixedActivationOrder = 0;
 	public static final     int rwrActivationOrder = 1;  // random with replacement
@@ -56,6 +59,7 @@ public class Model extends ModelParameters {
 	public double	       totalPheromone;
 	public double	       averageBugNbor1Count; // avg of #bugs d=1 away from each bug
 	public double	       averageBugNbor2Count; // d=2 away
+	public int             foodListSize; // how many foods in the world
 
 
 	// an iv used by repast for keeping track of model steps
@@ -196,7 +200,8 @@ public class Model extends ModelParameters {
 			System.out.printf( "==> userSetup...\n" );
 
 		antList = null;
-		foodList = null;                // discard old lists 
+		foodList = null;
+		allList = null;                // discard old lists 
 		world = null;                   // get rid of the world object!
 		pSpace = null;
 		pSpaceCarryingFood = null;
@@ -216,13 +221,15 @@ public class Model extends ModelParameters {
 
 		antList = new ArrayList<Ant> (); // create new empty list 
 		foodList = new ArrayList<Food> ();
+		allList = new ArrayList<ObjectInGrid> ();
 
 		// create the 2D grid world of requested size, linked to this model
 		world = new TorusWorld( sizeX, sizeY, this );
 
-		// Set up the pheromone space and related fields.
+		// Set up the pheromone spaces and related fields.
 		// create the 2D diffusion space for pheromones, tell bugs about it
 		pSpace = new Diffuse2D( diffusionK, evapRate, sizeX, sizeY );
+		pSpaceCarryingFood = new Diffuse2D( diffusionK, evapRate, sizeX, sizeY );
 		// set up the location of exogenous source of pheromone
 		pSourceX = sizeX/2;
 		pSourceY = sizeY/2;
@@ -251,9 +258,13 @@ public class Model extends ModelParameters {
 		Ant.setModel( this );
 		Ant.setWorld( world );
 		Ant.setPSpace( pSpace );
+		Ant.setPSpaceCarryingFood( pSpaceCarryingFood );
 		Ant.setRandomMoveMethod( randomMoveMethod );
 
 		createAntsAndAddToWorld();
+		
+		allList.addAll(foodList);
+		allList.addAll(antList);
 
 		if ( rDebug > 0 )
 			System.out.printf( "<==  userbuildModel done.\n" );
@@ -344,9 +355,12 @@ public class Model extends ModelParameters {
 	}     
         
         public void removeFoodFromModel ( Food food, Boolean removeFromList ) {
+		// if ( food == null ) return;
+		
 		if ( removeFromList )
-			foodList.remove( food );
 		        world.putObjectAt( food.getX(), food.getY(), null );
+		        foodList.remove( food );
+		        allList.remove( food ); 
 	}
         
 	/**
@@ -359,6 +373,7 @@ public class Model extends ModelParameters {
 	       Food food = new Food();
 	       return food;
 	}
+        
 
 	/**
 	// step
@@ -415,9 +430,25 @@ public class Model extends ModelParameters {
 			}
 		}
 
-		for ( Ant ant : antList )   // each agents gets older
+		for ( Ant ant : antList ) {  // each agents gets older
 			ant.incrementAge(1);
-
+			// look at the neighborhood & id food objects 
+                        ArrayList<Food> foodNbrList = world.getFoodLocations( ant.getX(), ant.getY() );
+                 	// now pick a random food point, if any to pick from
+                 	if ( foodNbrList != null ) {
+                 	        if ( rDebug > 0 )
+        				System.out.printf( "foodNbrList.size = %d.\n", foodNbrList.size() );
+                 	        if ( foodNbrList.size() > 0 && !ant.getCarryingFood() ) {
+                         	                int randomFood = randomNumber.nextInt(foodNbrList.size());
+                         		        Food foodP = foodNbrList.get( randomFood );
+                         	                removeFoodFromModel( foodP, true );
+                                                ant.setCarryingFood( true );
+                         	        }
+                        }                              
+                }
+		
+		
+		
 		// add the exogenous supply.  be sure not to go over maxPher
 		// otherwise the color doesn't work right.
 		// *** Note: This assumes the bugs have not altered the PSpace
@@ -444,7 +475,7 @@ public class Model extends ModelParameters {
 	/**
 	// stepReport
 	// called each model time step to write out lines that look like: 
-    //     timeStep  ...data...data...data...
+        // timeStep  ...data...data...data...
 	// first it calls a method to calculate stats to be written.
 	*/
 	public void stepReport () {
@@ -518,6 +549,7 @@ public class Model extends ModelParameters {
 			averageBugNbor1Count = totalNbor1Count / antList.size();
 			averageBugNbor2Count = totalNbor2Count / antList.size();
 		}
+		
 	}
 
 
@@ -543,6 +575,7 @@ public class Model extends ModelParameters {
 		}
 		calcStats();  // just in case...
 		System.out.printf( " avgDistToSource: %.3f\n", antPopAvgDistanceFromSource );
+		System.out.printf( " foodListSize: %3d", foodList.size() );
 		System.out.printf( "\n" );
 	}
 

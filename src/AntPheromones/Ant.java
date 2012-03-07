@@ -29,6 +29,7 @@ public class Ant implements ObjectInGrid, Drawable {
 	public static TorusWorld    	world;  	// where the agents live
 	public static Model		model;      // the model "in charge"
 	public static Diffuse2D	        pSpace;	    // where the pheromone is stored
+	public static Diffuse2D         pSpaceCarryingFood;
 	public static GUIModel		guiModel = null;   // the gui model "in charge"
         // we'll use this to draw a border around the bugs' cells (the f means float)
         public  static BasicStroke      bugEdgeStroke = new BasicStroke( 1.0f );
@@ -154,6 +155,9 @@ public class Ant implements ObjectInGrid, Drawable {
 	public static void resetNextId() { nextId = 0; }  // call when we reset the model
 	public static void setPSpace( Diffuse2D space ) {
 		pSpace = space;
+	}
+	public static void setPSpaceCarryingFood( Diffuse2D space ) {
+		pSpaceCarryingFood = space;
 	}
 	public static void setGUIModel( GUIModel m ) { guiModel = m; }
 	public static void setRandomMoveMethod  ( int r ) { 

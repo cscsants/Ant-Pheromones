@@ -19,12 +19,13 @@ import uchicago.src.sim.gui.Value2DDisplay;
 public class GUIModel extends Model {
 
     private Object2DDisplay  worldDisplay;	// 2D Object lattice -> display (Repast)
-	private Object2DDisplay  foodDisplay;  // 2D object lattics -> display (Repast) FOOD!
+    // private Object2DDisplay  foodDisplay;  // 2D object lattics -> display (Repast) FOOD!
     private DisplaySurface	 dsurf;		    // display surface (RePast)
-	public Value2DDisplay    pSpaceDisplay; // 2D Value lattice  -> display (Repast)
+    public Value2DDisplay    pSpaceDisplay; // 2D Value lattice  -> display (Repast)
 
     public  OpenSequenceGraph		graph;
     public  OpenSequenceGraph		graphNbors;
+    public  OpenSequenceGraph           graphFood;
 
 	// colormap and scaling variables
 	public static ColorMap		 pherColorMap;
@@ -56,9 +57,11 @@ public class GUIModel extends Model {
 		if ( dsurf != null ) dsurf.dispose();
 		if ( graph != null )  graph.dispose();
 		if ( graphNbors != null )  graphNbors.dispose();
+		if ( graphFood != null )  graphFood.dispose();
 		graph = null;
 		dsurf = null;
 		graphNbors = null;
+		graphFood = null;
 
 		// tell the Ant class we are in GUI mode.
 		Ant.setupBugDrawing( this );
@@ -132,10 +135,10 @@ public class GUIModel extends Model {
 		
 		// create mapper object, from 2D GridWorld to the display surface
 		worldDisplay = new Object2DDisplay( world );
-		foodDisplay = new Object2DDisplay( world );
+		// foodDisplay = new Object2DDisplay( world );
 		// speed up display of ants -- just display them!
-        worldDisplay.setObjectList( antList );
-		foodDisplay.setObjectList( foodList );
+        worldDisplay.setObjectList( allList );
+		// foodDisplay.setObjectList( foodList );
 
 		// create the link between the pSpace and the dsurf.
 		// we have to tell it how to scale values to fit the colorMap.
@@ -154,7 +157,7 @@ public class GUIModel extends Model {
         dsurf.addDisplayable( pSpaceDisplay, "Pheromone");
 		// now add the display of agents
         dsurf.addDisplayableProbeable( worldDisplay, "Agents");
-		dsurf.addDisplayableProbeable( foodDisplay, "Food");
+		// dsurf.addDisplayableProbeable( foodDisplay, "Food");
         addSimEventListener( dsurf );  // link to the other parts of the repast gui
 
 		dsurf.display();
@@ -208,6 +211,24 @@ public class GUIModel extends Model {
 		graphNbors.addSequence("Avg. Bug 2-Nbor Count", new AverageBugNbor2Count());
 
 		graphNbors.display();
+		
+		
+	        // graph showing number of food objects
+		
+		class SeqFoodListSize implements Sequence {
+			public double getSValue() {
+				return foodList.size();
+			}
+		}
+
+		graphFood = new OpenSequenceGraph( "Food Stats", this );
+		graphFood.setXRange( 0, 200 );
+		graphFood.setYRange( 0, 250 );
+		graphFood.setYIncrement( 20 );
+		graphFood.setAxisTitles( "time", "Food List Size" );
+		graphFood.addSequence("Food List Size", new SeqFoodListSize(), Color.BLUE );
+		
+		graphFood.display();
 		
 		if ( rDebug > 0 )
 			System.out.printf( "<== GUIModel buildDisplay done.\n" );

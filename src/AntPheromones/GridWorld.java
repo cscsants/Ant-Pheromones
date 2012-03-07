@@ -184,8 +184,8 @@ public class GridWorld extends Object2DGrid {
 	 *         each  cell with a food object in the Moore neighborhood around the given
 	 *         x,y location.
 	 */
-	public ArrayList<Point> getFoodLocations(int x, int y) {
-		ArrayList<Point> foodPtList = new ArrayList<Point>();
+	ArrayList<Food> getFoodLocations(int x, int y) {
+		ArrayList<Food> foodPtList = new ArrayList<Food>();
 
 		// figure out the range of cells to search
 		int minX = Math.max(0, x - 1);
@@ -197,13 +197,14 @@ public class GridWorld extends Object2DGrid {
 		for (int ty = minY; ty <= maxY; ++ty) {
 			for (int tx = minX; tx <= maxX; ++tx) {
 				if (getObjectAt(tx, ty) instanceof Food ) { // its food
-					Point p = new Point(tx, ty);
-					foodPtList.add(p);
+					foodPtList.add( (Food)getObjectAt(tx, ty) );
 				}
 			}
 		}
-
-		return foodPtList;
+                if ( foodPtList.size() > 0 )
+		        return foodPtList;
+		else 
+		        return null;
 	}
 	/**
 	 * testGetOpenNeighborLocations

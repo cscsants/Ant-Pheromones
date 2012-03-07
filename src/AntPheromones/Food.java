@@ -18,8 +18,6 @@ import java.awt.Color;
 
 import uchicago.src.sim.gui.Drawable;
 import uchicago.src.sim.gui.SimGraphics;
-// import uchicago.src.sim.space.Diffuse2D;
-// import uchicago.src.sim.gui.ColorMap;
 
 public class Food implements ObjectInGrid, Drawable {
 // class variables, should be the same for all objects
@@ -27,12 +25,13 @@ public class Food implements ObjectInGrid, Drawable {
 	public  static TorusWorld    	world;  	// where the agents live
 	public  static Model		model;      // the model "in charge"
 	public  static GUIModel		guiModel = null;   // the gui model "in charge"
+       
 	
 	public  static BasicStroke      foodEdgeStroke = new BasicStroke( 1.0f ); 
 // instance variable
-	public int 	   		id;			// unique id number for each food instance
-	public int			x, y;		// cache the food pile x,y location
-	public int			size;		// "size" of food - how much is there
+	public int 	   		id;	    // unique id number for each food instance
+	public int			x, y;	    // cache the food pile x,y location
+	public int			size;	    // "size" of food - how much is there
 	public Color		        myColor;    // color of this agent
 
 	
