@@ -25,14 +25,14 @@ import uchicago.src.sim.space.Object2DGrid;
 
 public class Ant implements ObjectInGrid, Drawable {
 	// "class" variables -- one value for all instances 
-    public static int          	nextId = 0; // to give each an id
-	public static TorusWorld    	world;  	// where the agents live
-	public static Model		model;      // the model "in charge"
-	public static Diffuse2D	        pSpace;	    // where the pheromone is stored
-	public static Diffuse2D         pSpaceCarryingFood;
+    public static int 			nextId = 0; // to give each an id
+	public static TorusWorld 	world;  	// where the agents live
+	public static Model			model;      // the model "in charge"
+	public static Diffuse2D	    pSpace;	    // where the nest pheromone is stored
+	public static Diffuse2D     pSpaceCarryingFood; // where the ant pheromones is stored
 	public static GUIModel		guiModel = null;   // the gui model "in charge"
-        // we'll use this to draw a border around the bugs' cells (the f means float)
-        public  static BasicStroke      bugEdgeStroke = new BasicStroke( 1.0f );
+    // we'll use this to draw a border around the bugs' cells (the f means float)
+    public  static BasicStroke      bugEdgeStroke = new BasicStroke( 1.0f );
 	// randomMoveMethod -- how to pick that random cell to move to
 	//  0 -> pick uniform random from list
 	//  1 -> biased way to do it!
@@ -44,16 +44,15 @@ public class Ant implements ObjectInGrid, Drawable {
 	public static final double   colorMapMax =  colorMapSize - 1.0;
 	
 	// instance variables  
-	public int 	   	id;		// unique id number for each ant instance
-	public int 		x, y;		// cache the ant's x,y location
+	public int 	   		id;		// unique id number for each ant instance
+	public int 			x, y;		// cache the ant's x,y location
 	public double		weight;		// ant's weight
-	public int		age;		// ant's age in days
+	public int			age;		// ant's age in days
 	public boolean		live;		// is it live or dead
 	public double		probRandMove;   // probability i'll  move randomly
 	public Color		myColor;        // color of this agent
-	public boolean          carryingFood;   // is the ant carrying food?
-	public boolean          atNest;         // is the ant at the nest?
-
+	public boolean      carryingFood;   // is the ant carrying food?
+   
 	// an Ant constructor
 	// note it assigns ID values in sequence as ant's are created.
 	public Ant ( ) {
@@ -64,7 +63,7 @@ public class Ant implements ObjectInGrid, Drawable {
 		probRandMove = 0.0;
 		setInitialColor();
 		carryingFood = false;
-		atNest = false;
+		
 	}
 
 	public Ant ( double wt ) {  // required weight parameters
@@ -158,8 +157,8 @@ public class Ant implements ObjectInGrid, Drawable {
 	public static void setPSpace( Diffuse2D space ) {
 		pSpace = space;
 	}
-	public static void setPSpaceCarryingFood( Diffuse2D space ) {
-		pSpaceCarryingFood = space;
+	public static void setPSpaceCarryingFood( Diffuse2D CFspace ) {
+		pSpaceCarryingFood = CFspace;
 	}
 	public static void setGUIModel( GUIModel m ) { guiModel = m; }
 	public static void setRandomMoveMethod  ( int r ) { 
@@ -180,9 +179,9 @@ public class Ant implements ObjectInGrid, Drawable {
 		return nbors.size();
 	}
         
-        public boolean amIAtNest( ant )
-                if ( getX() = world.sizeX/2 && getY() = world.sizeY/2 )
-                setAtNest = True; 
+    // public boolean amIAtNest( ant )
+	//	if ( getX() = world.sizeX/2 && getY() = world.sizeY/2 )
+	//  setAtNest = True; 
 
 	/**
 	// step
@@ -214,7 +213,10 @@ public class Ant implements ObjectInGrid, Drawable {
 			}
 		}
                 
-                if ( 
+		// TODO
+		// if carryingFood and at the nest, drop the food
+		//
+		//
 
 		if ( carryingFood ) {  // if carrying food, go to the nest
 			// try to move to cell with more pheromone
@@ -231,7 +233,7 @@ public class Ant implements ObjectInGrid, Drawable {
 			}
 		}
                 
-                else {  // look for ants carrying food &
+        else {  // look for ants carrying food &
 			// try to move to cell with more pheromone
 			Point pt =  findMostCarryingFoodPheromoneOpenNeighborCell ( neighborhoodRadius );
 			if ( pt != null ) {  // we got one!
@@ -288,11 +290,7 @@ public class Ant implements ObjectInGrid, Drawable {
 	//     	world.getObjectAt( xA, yA );
 	//	removeFoodFromModel( this, true );
 	//
-	//}
-
-			// tell the model to remove the food object
-
-			// set carryingFood to true
+    //}
 
 
 

@@ -21,8 +21,8 @@ import uchicago.src.sim.gui.SimGraphics;
 
 public class Food implements ObjectInGrid, Drawable {
 // class variables, should be the same for all objects
-	public  static int          	nextId = 0; // to give each an id
-	public  static TorusWorld    	world;  	// where the agents live
+	public  static int          nextId = 0; // to give each an id
+	public  static TorusWorld   world;  	// where the agents live
 	public  static Model		model;      // the model "in charge"
 	public  static GUIModel		guiModel = null;   // the gui model "in charge"
        
@@ -32,7 +32,7 @@ public class Food implements ObjectInGrid, Drawable {
 	public int 	   		id;	    // unique id number for each food instance
 	public int			x, y;	    // cache the food pile x,y location
 	public int			size;	    // "size" of food - how much is there
-	public Color		        myColor;    // color of this agent
+	public Color		myColor;    // color of this agent
 
 	
 // an Food constructor

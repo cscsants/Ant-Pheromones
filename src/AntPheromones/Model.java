@@ -21,17 +21,17 @@ public class Model extends ModelParameters {
 
 	// instance variables for run-time parameters
 	public int 	        numAnts = 20;         // initial number of ants
-    	public int              sizeX = 100, sizeY = 100;   // integer size of the world 
+    public int          sizeX = 100, sizeY = 100;   // integer size of the world 
 	public double		maxAntWeight = 10.0;   // max initial weight
-	public int		numFoods = 3;	      // initial food piles
-	public int		foodDepth = 4;	      // how many times growFoods will iterate
+	public int			numFoods = 3;	      // initial food piles
+	public int			foodDepth = 4;	      // how many times growFoods will iterate
 
-	public double	        diffusionK = 0.90;	// for the pheromone space
+	public double	    diffusionK = 0.90;	// for the pheromone space
 	public double		evapRate = 1.00; 	// this is really "inverse" of rate! 
-	public int		maxPher = 32000;    // max value, so we can map to colors
-	public int 		pSourceX, pSourceY; // exogenous source of pheromone
+	public int			maxPher = 32000;    // max value, so we can map to colors
+	public int 			pSourceX, pSourceY; // exogenous source of pheromone
 	public double		exogRate = 0.30;   	// exog source rate, frac  of maxPher
-	public int		initialSteps = 1000;   // pump in exog pher, diff, this # steps
+	public int			initialSteps = 1000;   // pump in exog pher, diff, this # steps
 
 	// instance variables for model "structures"
 	public ArrayList<Ant>   antList = new ArrayList<Ant> ();
@@ -40,13 +40,14 @@ public class Model extends ModelParameters {
 
 	public TorusWorld	world;         	// 2D class built over Repast
 	public Diffuse2D  	pSpace;			// a 2d space for pheromones from RePast
-	public Diffuse2D        pSpaceCarryingFood;   // a 2d space for pheromones dropped by ants
+	public Diffuse2D    pSpaceCarryingFood;   // a 2d space for pheromones dropped by ants
 
 	public double		probRandMoveMean;   // mean,var of probRandMove
 	public double		probRandMoveSD;    // assigned to bugs as created
-        public Random           randomNumber = new Random(); // Math.random() didnt seem to work with integers
+	// using the normal random number generator didn't create integers, so i found this package:
+    public Random       randomNumber = new Random(); 
         
-	public int		activationOrder;    // control how bug-activation is done
+	public 					int	activationOrder;    // control how bug-activation is done
 	public static final     int fixedActivationOrder = 0;
 	public static final     int rwrActivationOrder = 1;  // random with replacement
 	public static final     int rworActivationOrder = 2; // random without replacement
@@ -228,7 +229,7 @@ public class Model extends ModelParameters {
                 
                 // inject initial nest pheromone
                 createPSpaceAndInjectInitialPheromone();
-                createPSpaceCarryingFoodAndInjectInitialPheromone();
+                createPSpaceCarryingFood();
                 
                 for ( int i = 0; i < initialSteps; ++i ) {
                         injectExogenousPheromoneAndUpdate();
@@ -243,7 +244,7 @@ public class Model extends ModelParameters {
 		Food.setWorld( world );
 		
 		createFoodsAndAddToWorld();  // place our food pile "seeds" randomly
-       	        growFoods();  // add more food to the piles
+       	growFoods();  // add more food to the piles
 
 		// tell the Ant class about this (Model) and world addresses
 		// so that the ant's can send messages to them, e.g.,
@@ -272,13 +273,15 @@ public class Model extends ModelParameters {
         	pSpace.update();		
         }
         
-        private void createPSpaceCarryingFoodAndInjectInitialPheromone() {
-               // pSpaceCarryingFood = new Diffuse2D( diffusionK, evapRate, sizeX, sizeY );
-               pSpaceCarryingFood = new Diffuse2D( diffusionK, evapRate, sizeX, sizeY );  
+        private void createPSpaceCarryingFood() {
+			// there is something wrong with this
+             pSpaceCarryingFood = new Diffuse2D( diffusionK, evapRate, sizeX, sizeY );
+			 pSpaceCarryingFood.putValueAt( 0, 0, 0 );
+			 pSpaceCarryingFood.update();
         }
 
         private void createPSpaceAndInjectInitialPheromone() {
-        	// Set up the pheromone space and related fields.
+        	// Set up the nest pheromone space and related fields.
         	// create the 2D diffusion space for pheromones, tell bugs about it
         	pSpace = new Diffuse2D( diffusionK, evapRate, sizeX, sizeY );
         	// set up the location of exogenous source of pheromone
@@ -458,27 +461,28 @@ public class Model extends ModelParameters {
 
 		for ( Ant ant : antList ) {  // each agents gets older
 			ant.incrementAge(1);
-			// look at the neighborhood & id food objects 
-                        ArrayList<Food> foodNbrList = world.getFoodLocations( ant.getX(), ant.getY() );
+			// look at the neighborhood & id food objects
+			// if there's food, pick one at random, set carryingFood true, and head home
+            ArrayList<Food> foodNbrList = world.getFoodLocations( ant.getX(), ant.getY() );
                  	// now pick a random food point, if any to pick from
                  	if ( foodNbrList != null ) {
                  	        if ( rDebug > 0 )
-        				System.out.printf( "foodNbrList.size = %d.\n", foodNbrList.size() );
+								System.out.printf( "foodNbrList.size = %d.\n", foodNbrList.size() );
                  	        if ( foodNbrList.size() > 0 && !ant.getCarryingFood() ) {
-                         	                int randomFood = randomNumber.nextInt(foodNbrList.size());
-                         		        Food foodP = foodNbrList.get( randomFood );
-                         	                removeFoodFromModel( foodP, true );
-                                                ant.setCarryingFood( true );
-                         	        }
-                        }
-                        // now, if they're carrying food, drop pheromone
-                        double v = (maxPher * exogRate) + pSpaceCarryingFood.getValueAt(  ant.getX(), ant.getY() );
-        		v =  Math.min( v, maxPher );
-        		pSpaceCarryingFood.putValueAt( ant.getX(), ant.getY(), v );
+								int randomFood = randomNumber.nextInt(foodNbrList.size());
+                         		Food foodP = foodNbrList.get( randomFood );
+                         	    removeFoodFromModel( foodP, true );
+                                ant.setCarryingFood( true );
+                         	 }
+                    }
+             // now, if they're carrying food, drop pheromone
+             double v = (maxPher * exogRate) + pSpaceCarryingFood.getValueAt(  ant.getX(), ant.getY() );
+        	 v =  Math.min( v, maxPher );
+        	 pSpaceCarryingFood.putValueAt( ant.getX(), ant.getY(), v );
 
-        		// now update the pSpace -- move values from the write to read copy
-        		pSpaceCarryingFood.update();                              
-                }
+        	  // now update the pSpace -- move values from the write to read copy
+        	  pSpaceCarryingFood.update();                              
+          }
 		
 		
 		

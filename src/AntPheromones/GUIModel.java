@@ -42,6 +42,14 @@ public class GUIModel extends Model {
 	// existing display objects, and get ready to initialize 
 	// them at the start of the next 'run'.
 	//
+
+	//////////////////////////
+	// re: multiple pspaces
+	// it makes sense to me to have the same diffusion parameters, but that
+	// might be causing problems.  either way i've tried to create a duplicate of the
+	// existing pspace, but they seem to conflict somehow.  
+	//
+
 	public void setup() {
 	   	//System.out.printf( "==> GUIModel setup() called...\n" );
 
@@ -75,6 +83,7 @@ public class GUIModel extends Model {
 			new ActionListener() {
 				public void actionPerformed(ActionEvent evt) {
 					System.out.printf( "printBugs...\n" );
+
 					printBugs();
 				}
 			} 
@@ -133,7 +142,7 @@ public class GUIModel extends Model {
 		pherCFColorMap = new ColorMap ();
 		for (int i = 0; i < colorMapSize; i++) {
             // we specify the position i, and a fraction of each of RGB shade
-			pherColorMap.mapColor ( 0, 0, i, i /  colorMapMax );
+			pherCFColorMap.mapColor ( 0, 0, i, i /  colorMapMax );
 		}
 
 		// we are going to display bug color based on probRandMove
@@ -166,7 +175,7 @@ public class GUIModel extends Model {
 		int n = (int) (maxPher / colorMapMax);
 		if ( rDebug > 1 )
 			System.out.printf( "  -> pSpaceCarryingFoodDisplay scaling m = %d.\n", n );
-		pSpaceDisplay.setDisplayMapping( n, 0 );
+		pSpaceCarryingFoodDisplay.setDisplayMapping( n, 0 );
 
 		// add the pSpace to the surface first, so the bugs write over it.
         dsurf.addDisplayable( pSpaceDisplay, "Nest Pheromone");

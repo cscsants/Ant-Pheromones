@@ -185,6 +185,10 @@ public class GridWorld extends Object2DGrid {
 	 *         x,y location.
 	 */
 	ArrayList<Food> getFoodLocations(int x, int y) {
+		// this doesn't work, or at least nothing ever gets added to this array. 
+		// it seems like the food doesn't exist in the same space as the ants,
+		// but the ants can't pass through the food, so that makes no sense.
+		
 		ArrayList<Food> foodPtList = new ArrayList<Food>();
 
 		// figure out the range of cells to search
@@ -196,12 +200,14 @@ public class GridWorld extends Object2DGrid {
 		// search area for food cells
 		for (int ty = minY; ty <= maxY; ++ty) {
 			for (int tx = minX; tx <= maxX; ++tx) {
-				if (getObjectAt(tx, ty) instanceof Food ) { // its food
-					foodPtList.add( (Food)getObjectAt(tx, ty) );
+				if (getObjectAt(tx, ty) instanceof Food ) {  // check to see if its a food object
+					foodPtList.add( ( Food ) getObjectAt ( tx, ty ) );  // add it to the list
 				}
 			}
 		}
-                if ( foodPtList.size() > 0 )
+		// if there are food objects in the list pass them on
+		// tried this a few ways ( foodPtList != null, etc. ) but it would throw nullpointerexceptions
+        if ( foodPtList.size() > 0 )
 		        return foodPtList;
 		else 
 		        return null;
