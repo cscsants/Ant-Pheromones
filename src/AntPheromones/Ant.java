@@ -213,22 +213,24 @@ public class Ant implements ObjectInGrid, Drawable {
 			}
 		}
                 
-		// TODO
 		// if carryingFood and at the nest, drop the food
-		//
-		//
 
 		if ( carryingFood ) {  // if carrying food, go to the nest
-			// try to move to cell with more pheromone
-			Point pt =  findMostPheromoneOpenNeighborCell ( neighborhoodRadius );
-			if ( pt != null ) {  // we got one!
-				int newX = (int) pt.getX();
-				int newY = (int) pt.getY();
-				if ( pSpace.getValueAt( x, y ) < pSpace.getValueAt( newX, newY ) ) {
-					moved = world.moveObjectTo( this, newX, newY );
-					if ( moved &&  model.getRDebug() > 1 )
-						System.out.printf("     -- moved to better cell at %d,%d.\n",
-										  x, y );
+			if ( model.atNest( x, y ) ) {
+				carryingFood = false;
+			}
+			else {
+				// try to move to cell with more pheromone
+				Point pt =  findMostPheromoneOpenNeighborCell ( neighborhoodRadius );
+				if ( pt != null ) {  // we got one!
+					int newX = (int) pt.getX();
+					int newY = (int) pt.getY();
+					if ( pSpace.getValueAt( x, y ) < pSpace.getValueAt( newX, newY ) ) {
+						moved = world.moveObjectTo( this, newX, newY );
+						if ( moved &&  model.getRDebug() > 1 )
+							System.out.printf("     -- moved to better cell at %d,%d.\n",
+											  x, y );
+					}
 				}
 			}
 		}

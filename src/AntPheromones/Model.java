@@ -267,8 +267,12 @@ public class Model extends ModelParameters {
 			System.out.printf( "<==  userbuildModel done.\n" );
 
 	}
-        
-        
+
+	public boolean atNest( int x, int y ) {
+		if ( x > pSourceX - 2 && x < pSourceX + 2 && y > pSourceY - 2 && y < pSourceY + 2 )
+			return true;
+		return false; 
+	}
         private void injectExogenousPheromoneAndUpdate() {
         	double v = (maxPher * exogRate) + pSpace.getValueAt(  pSourceX, pSourceY );
         	v =  Math.min( v, maxPher );
