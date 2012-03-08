@@ -355,7 +355,7 @@ public class Model extends ModelParameters {
 	*/
 
 	public void growFoods() {
-		if ( rDebug > 0 )
+		if ( rDebug > 2 )
 			System.out.printf( "growFoods start: foodList.size = %d.\n",
 							   foodList.size() );
 	        
@@ -376,16 +376,18 @@ public class Model extends ModelParameters {
 						//	Random rand = new Random();
 						//	int r = rand.nextInt(1);
 						//if ( r == 1 ) 
-							world.putObjectAt( xA, yA, this ); // put the new food in the empty spot
+						if ( 0.5 > Model.getUniformDoubleFromTo( 0.0, 1.0 )) {
+							world.putObjectAt( xA, yA, f ); // put the new food in the empty spot
 	       					f.setX( xA ); // tell the food object where we put it
 							f.setY( yA );
 							newFoodList.add( f ); // add these new food object to newFoodList
+						}
 	       			}
-					if ( rDebug > 0 )
+					if ( rDebug > 2 )
 						System.out.printf( "newFoodList.size = %d.\n", newFoodList.size() );
 	       		}
 	       		foodList.addAll( newFoodList );
-				if ( rDebug > 0 )
+				if ( rDebug > 2 )
 					System.out.printf( "end foodList.size = %d.\n", foodList.size() );
 		}
 	}     
@@ -486,6 +488,7 @@ public class Model extends ModelParameters {
              // now, if they're carrying food, drop pheromone
 					if ( ant.carryingFood ) {
 						double v = pSpaceCarryingFood.getValueAt(  ant.getX(), ant.getY() );
+						v = v+10000;
 						v =  Math.min( v, maxPherCarry );
 						pSpaceCarryingFood.putValueAt( ant.getX(), ant.getY(), v );
 			 

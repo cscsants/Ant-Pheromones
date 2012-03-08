@@ -196,13 +196,19 @@ public class GridWorld extends Object2DGrid {
 		int maxX = Math.min(x + 1, xSize - 1);
 		int minY = Math.max(0, y - 1);
 		int maxY = Math.min(y + 1, ySize - 1);
-
+		
+		if ( theModel.getRDebug() > 0 ) 
+							System.err.printf( "  ---- adding to foodPtList \n" );
 		// search area for food cells
 		for (int ty = minY; ty <= maxY; ++ty) {
 			for (int tx = minX; tx <= maxX; ++tx) {
-				if (getObjectAt(tx, ty) instanceof Food ) {  // check to see if its a food object
+				if (getObjectAt(tx, ty) != null && getObjectAt(tx, ty).getClass() == Food.class ) {  // check to see if its a food object
 					foodPtList.add( ( Food ) getObjectAt ( tx, ty ) );  // add it to the list
+						if ( theModel.getRDebug() > 0 ) 
+							System.err.printf( "   foodPtList is %d big\n",
+											   foodPtList.size() );
 				}
+			
 			}
 		}
 		// if there are food objects in the list pass them on

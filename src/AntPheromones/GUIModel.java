@@ -305,6 +305,7 @@ public class GUIModel extends Model {
 		dsurf.updateDisplay();
 		graph.step();
 		graphNbors.step();
+		graphFood.step();
 
 	}
 
