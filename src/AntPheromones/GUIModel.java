@@ -142,7 +142,7 @@ public class GUIModel extends Model {
 		pherCFColorMap = new ColorMap ();
 		for (int i = 0; i < colorMapSize; i++) {
             // we specify the position i, and a fraction of each of RGB shade
-			pherCFColorMap.mapColor ( 0, 0, i, i /  colorMapMax );
+			pherCFColorMap.mapColor ( i, 0, i /  colorMapMax, 0 );
 		}
 
 		// we are going to display bug color based on probRandMove

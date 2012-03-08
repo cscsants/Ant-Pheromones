@@ -26,9 +26,12 @@ public class Model extends ModelParameters {
 	public int			numFoods = 3;	      // initial food piles
 	public int			foodDepth = 4;	      // how many times growFoods will iterate
 
-	public double	    diffusionK = 0.90;	// for the pheromone space
-	public double		evapRate = 1.00; 	// this is really "inverse" of rate! 
+	public double	    diffusionK = 0.90;	// for the nest pheromone space
+	public double		diffusionKCarry = 0.90; // for the carrying space
+	public double		evapRate = 1.00; 	// this is really "inverse" of rate!\
+	public double	    evapRateCarry = 1.00;  // this is 
 	public int			maxPher = 32000;    // max value, so we can map to colors
+	public int          maxPherCarry = 32000;
 	public int 			pSourceX, pSourceY; // exogenous source of pheromone
 	public double		exogRate = 0.30;   	// exog source rate, frac  of maxPher
 	public int			initialSteps = 1000;   // pump in exog pher, diff, this # steps
@@ -232,7 +235,7 @@ public class Model extends ModelParameters {
                 createPSpaceCarryingFood();
                 
                 for ( int i = 0; i < initialSteps; ++i ) {
-                        injectExogenousPheromoneAndUpdate();
+                    injectExogenousPheromoneAndUpdate();
                 	pSpace.diffuse();
                 }
 
@@ -275,7 +278,7 @@ public class Model extends ModelParameters {
         
         private void createPSpaceCarryingFood() {
 			// there is something wrong with this
-             pSpaceCarryingFood = new Diffuse2D( diffusionK, evapRate, sizeX, sizeY );
+             pSpaceCarryingFood = new Diffuse2D( diffusionKCarry, evapRateCarry, sizeX, sizeY );
 			 pSpaceCarryingFood.putValueAt( 0, 0, 0 );
 			 pSpaceCarryingFood.update();
         }
@@ -368,10 +371,15 @@ public class Model extends ModelParameters {
 	       			 	Food f = createNewFood(); // make a new food object f...
 	       				int xA = (int)p.getX(); // get the coordinates from the list...
 	       				int yA = (int)p.getY();
-	       				world.putObjectAt( xA, yA, this ); // put the new food in the empty spot
-	       				f.setX( xA ); // tell the food object where we put it
-	       				f.setY( yA );
-	       				newFoodList.add( f ); // add these new food object to foodList
+						////////
+						// attempt to create irregular shapes - doesn't work
+						//	Random rand = new Random();
+						//	int r = rand.nextInt(1);
+						//if ( r == 1 ) 
+							world.putObjectAt( xA, yA, this ); // put the new food in the empty spot
+	       					f.setX( xA ); // tell the food object where we put it
+							f.setY( yA );
+							newFoodList.add( f ); // add these new food object to newFoodList
 	       			}
 					if ( rDebug > 0 )
 						System.out.printf( "newFoodList.size = %d.\n", newFoodList.size() );
@@ -477,8 +485,8 @@ public class Model extends ModelParameters {
                     }
              // now, if they're carrying food, drop pheromone
 					if ( ant.carryingFood ) {
-						double v = (maxPher * exogRate) + pSpaceCarryingFood.getValueAt(  ant.getX(), ant.getY() );
-						v =  Math.min( v, maxPher );
+						double v = pSpaceCarryingFood.getValueAt(  ant.getX(), ant.getY() );
+						v =  Math.min( v, maxPherCarry );
 						pSpaceCarryingFood.putValueAt( ant.getX(), ant.getY(), v );
 			 
 						// now update the pSpace -- move values from the write to read copy

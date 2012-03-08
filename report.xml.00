@@ -2,7 +2,7 @@
 <reportfile>
 <parameters>
 	<rDebug>0</rDebug>
-	<seed>1331144208041</seed>
+	<seed>1331234985410</seed>
 	<stopT>100</stopT>
 	<sizeX>100</sizeX>
 	<sizeY>100</sizeY>
@@ -10,7 +10,7 @@
 	<diffusionK>0.9</diffusionK>
 	<evapRate>1.0</evapRate>
 	<exogRate>0.3</exogRate>
-	<foodDepth>4</foodDepth>
+	<foodDepth>5</foodDepth>
 	<initialAgentsFileName></initialAgentsFileName>
 	<initialParametersFileName></initialParametersFileName>
 	<numFoods>3</numFoods>
