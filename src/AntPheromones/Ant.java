@@ -51,6 +51,7 @@ public class Ant implements ObjectInGrid, Drawable {
 	public boolean		live;		// is it live or dead
 	public double		probRandMove;   // probability i'll  move randomly
 	public Color		myColor;        // color of this agent
+	public Color		myEdgeColor;
 	public boolean      carryingFood;   // is the ant carrying food?
    
 	// an Ant constructor
@@ -218,8 +219,11 @@ public class Ant implements ObjectInGrid, Drawable {
 		if ( carryingFood ) {  // if carrying food, go to the nest
 			if ( model.atNest( x, y ) ) {
 				carryingFood = false;
+				myEdgeColor = Color.white;
+				makeRandomMove();
 			}
 			else {
+				myEdgeColor = Color.pink;
 				// try to move to cell with more pheromone
 				Point pt =  findMostPheromoneOpenNeighborCell ( neighborhoodRadius );
 				if ( pt != null ) {  // we got one!
@@ -237,11 +241,13 @@ public class Ant implements ObjectInGrid, Drawable {
                 
         else {  // look for ants carrying food &
 			// try to move to cell with more pheromone
+			myEdgeColor = Color.yellow;
 			Point pt =  findMostCarryingFoodPheromoneOpenNeighborCell ( neighborhoodRadius );
 			if ( pt != null ) {  // we got one!
 				int newX = (int) pt.getX();
 				int newY = (int) pt.getY();
-				if ( pSpaceCarryingFood.getValueAt( x, y ) < pSpaceCarryingFood.getValueAt( newX, newY ) ) {
+				if ( pSpaceCarryingFood.getValueAt( x, y ) < pSpaceCarryingFood.getValueAt( newX, newY )
+				 	&& pSpaceCarryingFood.getValueAt( newX, newY ) > 3000 ) {
 					moved = world.moveObjectTo( this, newX, newY );
 					if ( moved &&  model.getRDebug() > 1 )
 						System.out.printf("     -- moved to better cell at %d,%d.\n",
@@ -495,7 +501,7 @@ public class Ant implements ObjectInGrid, Drawable {
 	*/
     public void draw( SimGraphics g ) {
 	   	g.drawFastRoundRect( myColor );
-        g.drawRectBorder( bugEdgeStroke, Color.yellow );
+        g.drawRectBorder( bugEdgeStroke, myEdgeColor );
     }
 
 

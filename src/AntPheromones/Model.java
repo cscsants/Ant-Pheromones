@@ -20,21 +20,21 @@ import uchicago.src.sim.util.SimUtilities;
 public class Model extends ModelParameters {
 
 	// instance variables for run-time parameters
-	public int 	        numAnts = 20;         // initial number of ants
+	public int 	        numAnts = 200;         // initial number of ants
     public int          sizeX = 100, sizeY = 100;   // integer size of the world 
 	public double		maxAntWeight = 10.0;   // max initial weight
 	public int			numFoods = 3;	      // initial food piles
-	public int			foodDepth = 4;	      // how many times growFoods will iterate
+	public int			foodDepth = 10;	      // how many times growFoods will iterate
 
 	public double	    diffusionK = 0.90;	// for the nest pheromone space
-	public double		diffusionKCarry = 0.90; // for the carrying space
+	public double		diffusionKCarry = 0.99; // for the carrying space
 	public double		evapRate = 1.00; 	// this is really "inverse" of rate!\
-	public double	    evapRateCarry = 1.00;  // this is 
+	public double	    evapRateCarry = 0.995;  // this is 
 	public int			maxPher = 32000;    // max value, so we can map to colors
-	public int          maxPherCarry = 32000;
+	public int          maxPherCarry = 64000;
 	public int 			pSourceX, pSourceY; // exogenous source of pheromone
 	public double		exogRate = 0.30;   	// exog source rate, frac  of maxPher
-	public int			initialSteps = 1000;   // pump in exog pher, diff, this # steps
+	public int			initialSteps = 5000;   // pump in exog pher, diff, this # steps
 
 	// instance variables for model "structures"
 	public ArrayList<Ant>   antList = new ArrayList<Ant> ();
@@ -92,7 +92,9 @@ public class Model extends ModelParameters {
 		parametersMap.put( "nF", "numFoods");
 		parametersMap.put( "fD", "foodDepth");
 		parametersMap.put( "eR", "evapRate" );
+		parametersMap.put( "eRc", "evapRateCarry" );
 		parametersMap.put( "dK", "diffusionK" );
+		parametersMap.put( "dKc", "diffusionKCarry");
 		parametersMap.put( "exogR", "exogRate" );
 		parametersMap.put( "prmm", "probRandMoveMean"  );
 		parametersMap.put( "prmsd", "probRandMoveSD" );
@@ -103,7 +105,7 @@ public class Model extends ModelParameters {
 	// Specify what appears in the repast parameter panel
 	public String[] getInitParam () {
 		String[] params = { "numAnts", "numFoods", "foodDepth", "sizeX", "sizeY",
-							"evapRate", "diffusionK", "exogRate",
+							"evapRate", "diffusionK", "evapRateCarry", "diffusionKCarry", "exogRate",
 							"probRandMoveMean", "probRandMoveSD", "activationOrder", 
 							"randomMoveMethod",
 				// these are from the super class:
@@ -149,6 +151,18 @@ public class Model extends ModelParameters {
 		this.evapRate = evapRate;  
 		if ( pSpace != null )
 			pSpace.setEvaporationRate( evapRate );
+	}
+	public double getDiffusionKCarry () { return diffusionKCarry; }
+	public void setDiffusionKCarry ( double diffusionKCarry ) { 
+		this.diffusionKCarry = diffusionKCarry;
+		if ( pSpaceCarryingFood != null )
+			pSpaceCarryingFood.setDiffusionConstant( diffusionKCarry );
+	}
+	public double getEvapRateCarry () { return evapRateCarry; }
+	public void setEvapRateCarry ( double evapRateCarry ) { 
+		this.evapRateCarry = evapRateCarry;  
+		if ( pSpaceCarryingFood != null )
+			pSpaceCarryingFood.setEvaporationRate( evapRateCarry );
 	}
 	public double getExogRate () { return exogRate; }
 	public void setExogRate ( double exogRate ) { 
@@ -269,7 +283,7 @@ public class Model extends ModelParameters {
 	}
 
 	public boolean atNest( int x, int y ) {
-		if ( x > pSourceX - 2 && x < pSourceX + 2 && y > pSourceY - 2 && y < pSourceY + 2 )
+		if ( x > pSourceX - 10 && x < pSourceX + 10 && y > pSourceY - 10 && y < pSourceY + 10 )     
 			return true;
 		return false; 
 	}
@@ -480,24 +494,44 @@ public class Model extends ModelParameters {
             ArrayList<Food> foodNbrList = world.getFoodLocations( ant.getX(), ant.getY() );
                  	// now pick a random food point, if any to pick from
                  	if ( foodNbrList != null ) {
+							// dump a bunch of pheromone
+							double w = pSpaceCarryingFood.getValueAt(  ant.getX(), ant.getY() );
+							w = w+45000;
+							w =  Math.min( w, maxPherCarry );
+							pSpaceCarryingFood.putValueAt( ant.getX(), ant.getY(), w );
+							pSpaceCarryingFood.update();
+							
                  	        if ( rDebug > 0 )
 								System.out.printf( "foodNbrList.size = %d.\n", foodNbrList.size() );
                  	        if ( foodNbrList.size() > 0 && !ant.getCarryingFood() ) {
 								int randomFood = randomNumber.nextInt(foodNbrList.size());
                          		Food foodP = foodNbrList.get( randomFood );
                          	    removeFoodFromModel( foodP, true );
-                                ant.setCarryingFood( true );
+                                ant.setCarryingFood( true );	
                          	 }
+								
                     }
              // now, if they're carrying food, drop pheromone
 					if ( ant.carryingFood ) {
-						double v = pSpaceCarryingFood.getValueAt(  ant.getX(), ant.getY() );
-						v = v+10000;
-						v =  Math.min( v, maxPherCarry );
+					   double v = pSpaceCarryingFood.getValueAt(  ant.getX(), ant.getY() );
+					   v = v+5000;
+					   v =  Math.min( v, maxPherCarry );
 						pSpaceCarryingFood.putValueAt( ant.getX(), ant.getY(), v );
 			 
 						// now update the pSpace -- move values from the write to read copy
-						pSpaceCarryingFood.update();        
+						//pSpaceCarryingFood.update();        
+					}
+					if ( atNest( ant.getX(), ant.getY()) ) {
+						pSpaceCarryingFood.putValueAt( ant.getX(), ant.getY(), 0 );
+						pSpaceCarryingFood.putValueAt( ant.getX()-1, ant.getY(), 0 );
+						pSpaceCarryingFood.putValueAt( ant.getX(), ant.getY()-1, 0 );
+						pSpaceCarryingFood.putValueAt( ant.getX()+1, ant.getY(), 0 );
+						pSpaceCarryingFood.putValueAt( ant.getX(), ant.getY()+1, 0 );
+						pSpaceCarryingFood.putValueAt( ant.getX()+1, ant.getY()+1, 0 );
+						pSpaceCarryingFood.putValueAt( ant.getX()-1, ant.getY()-1, 0 );
+						pSpaceCarryingFood.putValueAt( ant.getX()-1, ant.getY()+1, 0 );
+						pSpaceCarryingFood.putValueAt( ant.getX()+1, ant.getY()-1, 0 );
+						pSpaceCarryingFood.update();
 					}
           }
 		
